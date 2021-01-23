@@ -16,6 +16,7 @@ import en from '@angular/common/locales/en';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { ZorroAntdModule } from './app-zorro.module';
 
 registerLocaleData(en);
 
@@ -27,12 +28,16 @@ registerLocaleData(en);
     BrowserModule,
     RouterModule.forRoot([]),
     AppRoutingModule,
+
     SharedModule,
     GearPageModule,
     LandingPageModule,
+
     FormsModule,
     HttpClientModule,
-    BrowserAnimationsModule
+    BrowserAnimationsModule,
+    
+    ZorroAntdModule
   ],
   providers: [{ provide: NZ_I18N, useValue: en_US }],
   bootstrap: [AppComponent]

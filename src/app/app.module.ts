@@ -21,25 +21,23 @@ import { ZorroAntdModule } from './app-zorro.module';
 registerLocaleData(en);
 
 @NgModule({
-  declarations: [
-    AppComponent,
-  ],
-  imports: [
-    BrowserModule,
-    RouterModule.forRoot([]),
-    AppRoutingModule,
+    declarations: [AppComponent],
+    imports: [
+        BrowserModule,
+        RouterModule.forRoot([]),
+        AppRoutingModule,
 
-    SharedModule,
-    GearPageModule,
-    LandingPageModule,
+        SharedModule,
+        GearPageModule,
+        LandingPageModule,
 
-    FormsModule,
-    HttpClientModule,
-    BrowserAnimationsModule,
-    
-    ZorroAntdModule
-  ],
-  providers: [{ provide: NZ_I18N, useValue: en_US }],
-  bootstrap: [AppComponent]
+        FormsModule,
+        HttpClientModule,
+        BrowserAnimationsModule,
+
+        ZorroAntdModule,
+    ],
+    providers: [{ provide: NZ_I18N, useValue: en_US }],
+    bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}

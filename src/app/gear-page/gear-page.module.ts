@@ -5,18 +5,17 @@ import { SharedModule } from '../shared-module/shared.module';
 import { GearPageRoutingModule } from './gear-page-routing.module';
 import { GearPageComponent } from './home/gear-page.component';
 import { ZorroAntdModule } from '../app-zorro.module';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
-  declarations: [
-    GearPageComponent
-  ],
-  imports: [
-    CommonModule,
-    SharedModule,
-    FormsModule,
-    GearPageRoutingModule,
-    ZorroAntdModule
-  ]
+    declarations: [GearPageComponent],
+    imports: [
+        CommonModule,
+        SharedModule,
+        FormsModule,
+        ReactiveFormsModule,
+        GearPageRoutingModule,
+        ZorroAntdModule,
+    ],
 })
-export class GearPageModule { }
+export class GearPageModule {}

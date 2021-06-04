@@ -3,14 +3,14 @@ import { Routes, RouterModule } from '@angular/router';
 import { GearPageComponent } from './home/gear-page.component';
 
 const routes: Routes = [
-  {
-    path: '',
-    component: GearPageComponent
-  }
+    {
+        path: '',
+        component: GearPageComponent,
+    },
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+    imports: [RouterModule.forChild(routes)],
+    exports: [RouterModule],
 })
-export class GearPageRoutingModule { }
+export class GearPageRoutingModule {}

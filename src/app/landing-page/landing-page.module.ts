@@ -5,13 +5,7 @@ import { LandingPageRoutingModule } from './landing-page-routing.module';
 import { LandingPageComponent } from './home/landing-page.component';
 
 @NgModule({
-  declarations: [
-    LandingPageComponent
-  ],
-  imports: [
-    CommonModule,
-    SharedModule,
-    LandingPageRoutingModule
-  ]
+    declarations: [LandingPageComponent],
+    imports: [CommonModule, SharedModule, LandingPageRoutingModule],
 })
-export class LandingPageModule { }
+export class LandingPageModule {}

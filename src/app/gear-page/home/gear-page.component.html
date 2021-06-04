@@ -1,14 +1,18 @@
 <div class="gear-page">
     <div class="gear-canvas">
-        <canvas id="canvas" class="canvas-grid" #canvas></canvas>
+        <div id="figure" class="canvas-grid" #figure></div>
         <div class="canvas-grid">
             <div class="blank-space">&nbsp;</div>
             <div class="gear-slider">
                 <nz-slider [(ngModel)]="sliderValue"></nz-slider>
 
                 <div>
-                    <button nz-button nzType="primary" *ngIf="hasStarted"><i nz-icon nzType="pause"></i></button>
-                    <button nz-button nzType="primary" *ngIf="!hasStarted"><i nz-icon nzType="caret-right"></i></button>
+                    <button nz-button nzType="primary" *ngIf="hasStarted">
+                        <i nz-icon nzType="pause"></i>
+                    </button>
+                    <button nz-button nzType="primary" *ngIf="!hasStarted">
+                        <i nz-icon nzType="caret-right"></i>
+                    </button>
 
                     <button nz-button nzType="primary"><i>&#x25a0;</i></button>
                 </div>
@@ -17,45 +21,85 @@
     </div>
 
     <div class="gear-settings">
-        <form nz-form nzLayout="vertical">
+        <form [formGroup]="dataForm" nz-form nzLayout="vertical">
             <nz-form-item>
                 <nz-form-label nzFor="email">Module</nz-form-label>
                 <nz-form-control>
-                    <input nz-input name="module" type="number" value=11 required>
+                    <input
+                        nz-input
+                        formControlName="m"
+                        type="number"
+                        value="11"
+                        required
+                    />
                 </nz-form-control>
             </nz-form-item>
 
             <nz-form-item>
-                <nz-form-label nzFor="email">z <sub>1</sub>  (number of pinion's teeth)</nz-form-label>
+                <nz-form-label nzFor="email">
+                    z <sub>1</sub> &nbsp; (number of pinion's teeth)
+                </nz-form-label>
                 <nz-form-control>
-                    <input nz-input name="z1" type="number" value=13 required>
+                    <input
+                        nz-input
+                        formControlName="z1"
+                        type="number"
+                        required
+                    />
                 </nz-form-control>
             </nz-form-item>
 
             <nz-form-item>
-                <nz-form-label nzFor="email">z <sub>2</sub> (number of gears's teeth)</nz-form-label>
+                <nz-form-label nzFor="email">
+                    z <sub>2</sub> &nbsp; (number of gear's teeth)
+                </nz-form-label>
                 <nz-form-control>
-                    <input nz-input name="z2" type="number" value=47 required>
+                    <input
+                        nz-input
+                        formControlName="z2"
+                        type="number"
+                        required
+                    />
                 </nz-form-control>
             </nz-form-item>
 
             <nz-form-item>
-                <nz-form-label nzFor="email">x <sub>1</sub> (modification coefficient of pinion)</nz-form-label>
-                <nz-form-control >
-                    <input nz-input name="x1" type="number" value=0.80 required>
-                </nz-form-control>
-            </nz-form-item>
-
-            <nz-form-item>
-                <nz-form-label nzFor="email">x <sub>2</sub> (modification coefficient of gear)</nz-form-label>
+                <nz-form-label nzFor="email">
+                    x <sub>1</sub> &nbsp; (modification coefficient of pinion)
+                </nz-form-label>
                 <nz-form-control>
-                    <input nz-input name="x2" type="number" value=0.6032 required>
+                    <input
+                        nz-input
+                        formControlName="x1"
+                        type="number"
+                        required
+                    />
                 </nz-form-control>
             </nz-form-item>
 
+            <nz-form-item>
+                <nz-form-label nzFor="email">
+                    x <sub>2</sub> &nbsp; (modification coefficient of gear)
+                </nz-form-label>
+                <nz-form-control>
+                    <input
+                        nz-input
+                        formControlName="x2"
+                        type="number"
+                        required
+                    />
+                </nz-form-control>
+            </nz-form-item>
+
+            <button
+                nz-button
+                nzType="primary"
+                id="calculate-button"
+                (click)="submitForm()"
+            >
+                Calculate
+            </button>
         </form>
-
-        <button nz-button nzType="primary" id="calculate-button" (click)="onCalculateClick()">Calculate</button>
 
         <div class="blank-space">&nbsp;</div>
 

@@ -695,6 +695,7 @@ export class GearCouplingCalculationService {
             MechanismGeometry: GearElements,
         } as CalculationsResultsData;
 
+        let test;
         return Result;
     }
 

@@ -1,4 +1,3 @@
-import { mapToMapExpression } from '@angular/compiler/src/render3/util';
 import { Injectable } from '@angular/core';
 import * as d3 from 'd3';
 import {
@@ -8,12 +7,25 @@ import {
     GearCharacteristicsData,
     GearMechanismData,
     CalculationsResultsData,
+    GearGeometry,
 } from './gear-coupling-dimension.model';
 
 @Injectable({
     providedIn: 'root',
 })
 export class GearCouplingCalculationService {
+    private _defaultFigure:
+        | d3.Selection<SVGGElement, unknown, HTMLElement, any>
+        | undefined;
+
+    get defaultFigure() {
+        return this._defaultFigure;
+    }
+
+    set defaultFigure(value) {
+        this._defaultFigure = value;
+    }
+
     public radians(angle: number): number {
         return (Math.PI / 180) * angle;
     }
@@ -47,6 +59,50 @@ export class GearCouplingCalculationService {
         return angle1;
     }
 
+    public findTParameter(baseRadius: number, referenceRadius: number): number {
+        let dt = 0.1;
+
+        let t_next = 0;
+        let t_previous = 0;
+
+        while (true) {
+            let t = t_next;
+            var rho = this.polar(
+                new Point(
+                    baseRadius * (Math.cos(t) + t * Math.sin(t)),
+                    baseRadius * (Math.sin(t) - t * Math.cos(t))
+                )
+            ).rho;
+
+            if (rho > referenceRadius) {
+                break;
+            } else {
+                t_previous = t_next;
+                t_next += dt;
+            }
+        }
+
+        //Bisection method
+        while (true) {
+            let t = (t_next + t_previous) / 2;
+            var rho = this.polar(
+                new Point(
+                    baseRadius * (Math.cos(t) + t * Math.sin(t)),
+                    baseRadius * (Math.sin(t) - t * Math.cos(t))
+                )
+            ).rho;
+
+            let diff = referenceRadius - rho;
+            if (Math.abs(diff) < Math.pow(10, -10)) {
+                return t;
+            } else if (diff < 0) {
+                t_next = t;
+            } else {
+                t_previous = t;
+            }
+        }
+    }
+
     public cartesian(Rho: number, Phi: number): Point {
         return new Point(Rho * Math.cos(Phi), Rho * Math.sin(Phi));
     }
@@ -60,6 +116,18 @@ export class GearCouplingCalculationService {
 
     public translatePoint(p: Point, xOffset: number, yOffset: number): Point {
         return new Point(p.x + xOffset, p.y + yOffset);
+    }
+
+    public translateInvolute(
+        involuteProfile: Point[],
+        xOffset: number,
+        yOffset: number
+    ) {
+        let newProfile: Point[] = [];
+        involuteProfile.forEach((value) => {
+            newProfile.push(this.translatePoint(value, xOffset, yOffset));
+        });
+        return newProfile;
     }
 
     /**
@@ -82,6 +150,18 @@ export class GearCouplingCalculationService {
                 Math.cos(angle) * (point.y - origin.y) +
                 origin.y
         );
+    }
+
+    public rotateInvolute(
+        involuteProfile: Point[],
+        origin: Point,
+        angle: number
+    ): Point[] {
+        let newProfile: Point[] = [];
+        involuteProfile.forEach((value) => {
+            newProfile.push(this.rotatePointAroundOther(value, origin, angle));
+        });
+        return newProfile;
     }
 
     public linspace(length: number, start: number, stop: number) {
@@ -109,7 +189,7 @@ export class GearCouplingCalculationService {
         referencePitchDiameter: number,
         workingPitchDiameter: number,
         addendumDiameter: number
-    ): d3.Path[] {
+    ): GearGeometry[] {
         let dedendumGeometry = d3.path();
         dedendumGeometry.arc(
             center.x,
@@ -150,11 +230,11 @@ export class GearCouplingCalculationService {
         );
 
         return [
-            dedendumGeometry,
-            baseGeometry,
-            refPitchGeometry,
-            workPitchGeometry,
-            addendumGeometry,
+            { path: dedendumGeometry, attributes: undefined } as GearGeometry,
+            { path: baseGeometry, attributes: undefined } as GearGeometry,
+            { path: refPitchGeometry, attributes: undefined } as GearGeometry,
+            { path: workPitchGeometry, attributes: undefined } as GearGeometry,
+            { path: addendumGeometry, attributes: undefined } as GearGeometry,
         ];
     }
 
@@ -232,30 +312,42 @@ export class GearCouplingCalculationService {
     }
 
     public generateInvoluteProfile(
-        dTheta: number,
-        BaseRadius: number,
-        AddendumRadius: number,
-        InvoluteAngle: number,
-        IsDirectionInverted: boolean
+        baseRadius: number,
+        dedendumRadius: number,
+        addendumRadius: number,
+        isDirectionInverted: boolean
     ): Point[] {
-        var Alpha = this.inverseInvolute(InvoluteAngle);
-        var NegateDirection = IsDirectionInverted ? -1 : 1;
+        var dir = isDirectionInverted ? -1 : 1;
+        let t_max = this.findTParameter(baseRadius, addendumRadius);
+        let t_min = 0;
 
-        var List = new Array<Point>();
-        for (let i = 0; i < Alpha * 1.5; i += dTheta / 2) {
-            var InvolutePoint = new Point(
-                BaseRadius * (Math.cos(i) + i * Math.sin(i)),
-                NegateDirection * BaseRadius * (Math.sin(i) - i * Math.cos(i))
+        if (baseRadius < dedendumRadius)
+            t_min = this.findTParameter(baseRadius, dedendumRadius);
+
+        let list = new Array<Point>();
+        let t_array = this.linspace(10, t_min, t_max);
+        for (let t of t_array) {
+            list.push(
+                new Point(
+                    baseRadius * (Math.cos(t) + t * Math.sin(t)),
+                    dir * baseRadius * (Math.sin(t) - t * Math.cos(t))
+                )
             );
-
-            if (this.polar(InvolutePoint).rho <= AddendumRadius)
-                List.push(InvolutePoint);
         }
-        return List;
+
+        //TODO remove
+        let path = d3.path();
+        path.moveTo(0, 0);
+        for (let item of list) {
+            path.lineTo(item.x, item.y);
+        }
+        this.showElement(path).attr('stroke', 'red');
+        //TODO remove
+
+        return list;
     }
 
     public generateGearProfile(
-        dTheta: number,
         BaseRadius: number,
         DedendumRadius: number,
         AddendumRadius: number,
@@ -266,16 +358,26 @@ export class GearCouplingCalculationService {
         let collection = AngleCollection.entries();
         let [previousTheta, previousType] = collection.next().value;
 
-        //Result.moveTo() rising involute
+        let risingInvoluteProfile = this.generateInvoluteProfile(
+            BaseRadius,
+            DedendumRadius,
+            AddendumRadius,
+            false
+        );
+
+        let returningInvoluteProfile = this.generateInvoluteProfile(
+            BaseRadius,
+            DedendumRadius,
+            AddendumRadius,
+            true
+        );
+
         for (let [theta, type] of collection) {
             let point = new Point(0, 0);
             switch (type) {
                 case CurveType.Dedendum:
                     point = this.translatePoint(
-                        new Point(
-                            DedendumRadius * Math.cos(theta),
-                            DedendumRadius * Math.sin(theta)
-                        ),
+                        this.cartesian(DedendumRadius, theta),
                         Center.x,
                         Center.y
                     );
@@ -285,80 +387,41 @@ export class GearCouplingCalculationService {
                 case CurveType.RisingInvolute:
                     if (previousType != CurveType.RisingInvolute) continue;
 
-                    let RisingInvAlpha = theta - previousTheta;
-                    let RisingInvolute = this.generateInvoluteProfile(
-                        dTheta,
-                        BaseRadius,
-                        AddendumRadius,
-                        RisingInvAlpha,
-                        false
-                    );
-
-                    for (let Item of RisingInvolute) {
-                        let RaisingClampedPoint = Item;
-
-                        if (DedendumRadius > BaseRadius) {
-                            let RaisingPolarPoint = this.polar(Item);
-                            if (RaisingPolarPoint.rho < DedendumRadius)
-                                RaisingClampedPoint = this.cartesian(
-                                    DedendumRadius,
-                                    RaisingPolarPoint.theta
-                                );
-                        }
-
-                        let RisingTranslatedPoint = this.translatePoint(
-                            RaisingClampedPoint,
+                    let risingInvolute = this.rotateInvolute(
+                        this.translateInvolute(
+                            risingInvoluteProfile,
                             Center.x,
                             Center.y
-                        );
-                        let RisingRotatedPoint = this.rotatePointAroundOther(
-                            RisingTranslatedPoint,
-                            Center,
-                            previousTheta
-                        );
+                        ),
+                        Center,
+                        previousTheta
+                    );
 
-                        pointCollection.set(theta, point);
+                    let risingTh = this.linspace(10, previousTheta, theta);
+                    for (let [i, point] of risingInvolute.entries()) {
+                        pointCollection.set(risingTh[i], point);
                     }
                     break;
 
                 case CurveType.ReturningInvolute:
                     if (previousType != CurveType.ReturningInvolute) continue;
 
-                    let ReturningInvAlpha = theta - previousTheta;
-                    let ReturningInvolute = this.generateInvoluteProfile(
-                        dTheta,
-                        BaseRadius,
-                        AddendumRadius,
-                        ReturningInvAlpha,
-                        true
-                    );
-
-                    for (let Item of Array<Point>()
-                        .concat(ReturningInvolute)
-                        .reverse()) {
-                        let ReturningClampedPoint = Item;
-
-                        if (DedendumRadius > BaseRadius) {
-                            let ReturningPolarPoint = this.polar(Item);
-                            if (ReturningPolarPoint.rho < DedendumRadius)
-                                ReturningClampedPoint = this.cartesian(
-                                    DedendumRadius,
-                                    ReturningPolarPoint.theta
-                                );
-                        }
-
-                        let ReturningTranslatedPoint = this.translatePoint(
-                            ReturningClampedPoint,
+                    let returningInvolute = this.rotateInvolute(
+                        this.translateInvolute(
+                            returningInvoluteProfile,
                             Center.x,
                             Center.y
-                        );
-                        let ReturningRotatedPoint = this.rotatePointAroundOther(
-                            ReturningTranslatedPoint,
-                            Center,
-                            previousTheta
-                        );
+                        ),
+                        Center,
+                        previousTheta
+                    );
 
-                        pointCollection.set(theta, point);
+                    let returningTh = this.linspace(10, previousTheta, theta);
+                    for (let [i, point] of Array<Point>()
+                        .concat(returningInvolute)
+                        .reverse()
+                        .entries()) {
+                        pointCollection.set(returningTh[i], point);
                     }
                     break;
 
@@ -366,10 +429,7 @@ export class GearCouplingCalculationService {
                     //InvoluteMaxAngle = theta - previousTheta;
 
                     point = this.translatePoint(
-                        new Point(
-                            AddendumRadius * Math.cos(theta),
-                            AddendumRadius * Math.sin(theta)
-                        ),
+                        this.cartesian(AddendumRadius, theta),
                         Center.x,
                         Center.y
                     );
@@ -377,16 +437,27 @@ export class GearCouplingCalculationService {
                     pointCollection.set(theta, point);
                     break;
             }
+            previousTheta = theta;
         }
         // var aa = d3.line()(points.map((point) => {
         //     return [point.x, point.y]
         // }) as [number, number][]);
 
         var Result = d3.path();
-        Result.moveTo(0, 0);
+        let firstPoint = <Point>pointCollection.values().next().value;
+        Result.moveTo(firstPoint.x, firstPoint.y);
+
+        //let newPointCollection = new Map<number, Point>();
+        //let i = 0;
+        // pointCollection.forEach((value, key, map) => {
+        //     if (i <= 15) {
+        //         newPointCollection.set(key, value);
+        //         i++;
+        //     }
+        // });
+
         pointCollection.forEach((value, key, map) => {
             Result.lineTo(value.x, value.y);
-            //Result.moveTo(value.x, value.y);
         });
         return Result;
     }
@@ -398,7 +469,6 @@ export class GearCouplingCalculationService {
         x1: number,
         x2: number
     ): CalculationsResultsData {
-        var dTheta = 0.1;
         var alpha = this.radians(20);
 
         var i = z2 / z1;
@@ -534,7 +604,7 @@ export class GearCouplingCalculationService {
             GearData: Gear,
             PinionData: Pinion,
             MechanismData: MechanismData,
-            MechanismGeometry: null,
+            MechanismGeometry: undefined,
             ActionPosition: new Point(Pinion.OperatingPitchDiameter / 2, 0),
             GearPosition: new Point(
                 Pinion.OperatingPitchDiameter / 2 +
@@ -555,7 +625,7 @@ export class GearCouplingCalculationService {
         let pinion = data.PinionData;
         let gear = data.GearData;
 
-        let GearElements: d3.Path[] = new Array<d3.Path>(
+        let GearElements: GearGeometry[] = [
             ...this.generateGearCirclesGeometry(
                 new Point(0, 0),
                 pinion.DedendumDiameter,
@@ -571,8 +641,8 @@ export class GearCouplingCalculationService {
                 gear.ReferencePitchDiameter,
                 gear.OperatingPitchDiameter,
                 gear.AddendumDiameter
-            )
-        );
+            ),
+        ];
 
         let pinionAngles = this.generateAngleData(
             dTheta,
@@ -584,16 +654,16 @@ export class GearCouplingCalculationService {
                 this.radians(data.MechanismData.OperatingPressureAngle)
             )
         );
-        GearElements.push(
-            this.generateGearProfile(
-                dTheta,
+        GearElements.push({
+            path: this.generateGearProfile(
                 pinion.BaseCircleDiameter / 2,
                 pinion.DedendumDiameter / 2,
                 pinion.AddendumDiameter / 2,
                 pinionAngles,
                 new Point(0, 0)
-            )
-        );
+            ),
+            attributes: undefined,
+        });
 
         var Offset =
             (1 / 2) * Math.PI -
@@ -609,16 +679,16 @@ export class GearCouplingCalculationService {
             (2 * gear.ThicknessTip) / gear.AddendumDiameter,
             Offset
         );
-        GearElements.push(
-            this.generateGearProfile(
-                dTheta,
+        GearElements.push({
+            path: this.generateGearProfile(
                 gear.BaseCircleDiameter / 2,
                 gear.DedendumDiameter / 2,
                 gear.AddendumDiameter / 2,
                 gearAngles,
                 new Point(data.MechanismData.CenterDistance, 0)
-            )
-        );
+            ),
+            attributes: undefined,
+        });
 
         var Result = {
             ...data,
@@ -626,6 +696,37 @@ export class GearCouplingCalculationService {
         } as CalculationsResultsData;
 
         return Result;
+    }
+
+    showElement(
+        element: d3.Path,
+        figure:
+            | d3.Selection<SVGGElement, unknown, HTMLElement, any>
+            | undefined = undefined,
+        attributes: { key: string; value: string }[] | undefined = undefined
+    ) {
+        let result = null;
+
+        if (figure == undefined) {
+            if (this.defaultFigure == undefined)
+                throw new Error('Default SVG figure has not been specified');
+
+            result = this.defaultFigure
+                .append('path')
+                .attr('d', element.toString());
+        } else {
+            result = figure.append('path').attr('d', element.toString());
+        }
+
+        if (attributes == undefined) {
+            result.attr('stroke', 'black').attr('fill', 'none');
+        } else {
+            for (let entry of attributes) {
+                result = result.attr(entry.key, entry.value);
+            }
+        }
+
+        return result;
     }
 
     constructor() {}

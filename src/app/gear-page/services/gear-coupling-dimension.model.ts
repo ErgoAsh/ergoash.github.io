@@ -25,11 +25,19 @@ export class PolarPoint {
     }
 }
 
+export interface GearGeometry {
+    path: d3.Path;
+    attributes?: {
+        key: string;
+        value: string;
+    }[];
+}
+
 export interface CalculationsResultsData {
     PinionData: GearCharacteristicsData;
     GearData: GearCharacteristicsData;
     MechanismData: GearMechanismData;
-    MechanismGeometry: d3.Path[] | null;
+    MechanismGeometry?: GearGeometry[];
     PinionPosition: Point;
     GearPosition: Point;
     ActionPosition: Point;

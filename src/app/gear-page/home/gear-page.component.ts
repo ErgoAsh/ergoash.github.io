@@ -62,8 +62,21 @@ export class GearPageComponent implements AfterViewInit, OnInit {
     }
 
     ngAfterViewInit() {
-        // const canvas = this.canvas.nativeElement;
-        //this.context = canvas.getContext('2d');
+        let width = this.figure.nativeElement.clientWidth;
+        let height = this.figure.nativeElement.clientHeight;
+
+        let translate = 'translate(' + width / 2 + ', ' + height / 2 + ')';
+        let scale = 'scale(' + 4 + ', ' + 4 + ')';
+
+        this.gearService.defaultFigure = d3
+            .select('#figure')
+            .append('svg')
+            .attr('class', 'canvas-grid')
+            .style('height', height)
+            .style('width', width)
+            .attr('align', 'center')
+            .append('g')
+            .attr('transform', translate + ' ' + scale);
 
         this.tick();
     }
@@ -85,35 +98,8 @@ export class GearPageComponent implements AfterViewInit, OnInit {
         );
         let result = this.gearService.generateGearMechanismPath(parameters);
 
-        // let transX = this.canvas.nativeElement.width * 0.5,
-        //     transY = this.canvas.nativeElement.height * 0.5;
-
-        // this.context?.translate(transX, transY);
-        // this.context!.lineWidth = 1;
-        // this.context!.strokeStyle = 'black';
-
-        let width = this.figure.nativeElement.scrollWidth;
-        let height = this.figure.nativeElement.scrollHeight;
-
-        let translate = 'translate(' + width / 2 + ',' + height / 2 + ')';
-        let scale = 'scale(' + 2 + ',' + 2 + ')';
-
-        d3.select('svg').remove();
-        let svg = d3
-            .select('#figure')
-            .append('svg')
-            .attr('class', 'canvas-grid')
-            .style('height', height)
-            .style('width', width)
-            .attr('align', 'center')
-            .append('g')
-            .attr('transform', translate + ' ' + scale);
-
-        for (let path of result.MechanismGeometry || []) {
-            svg.append('path')
-                .attr('d', path.toString())
-                .attr('stroke', 'black')
-                .attr('fill', 'none');
+        for (let item of result.MechanismGeometry || []) {
+            this.gearService.showElement(item.path, undefined, item.attributes);
         }
     }
 }

@@ -1,4 +1,5 @@
 import {
+    AfterViewChecked,
     AfterViewInit,
     Component,
     ElementRef,
@@ -62,21 +63,9 @@ export class GearPageComponent implements AfterViewInit, OnInit {
     }
 
     ngAfterViewInit() {
-        let width = this.figure.nativeElement.clientWidth;
-        let height = this.figure.nativeElement.clientHeight;
+        //d3.select('svg').selectChild().remove();
 
-        let translate = 'translate(' + width / 2 + ', ' + height / 2 + ')';
-        let scale = 'scale(' + 4 + ', ' + 4 + ')';
-
-        this.gearService.defaultFigure = d3
-            .select('#figure')
-            .append('svg')
-            .attr('class', 'canvas-grid')
-            .style('height', height)
-            .style('width', width)
-            .attr('align', 'center')
-            .append('g')
-            .attr('transform', translate + ' ' + scale);
+        this.gearService.defaultFigure = d3.select('#svg').append('g');
 
         this.tick();
     }
@@ -87,7 +76,27 @@ export class GearPageComponent implements AfterViewInit, OnInit {
         //ctx.clearRect( 0, 0, 600, 400 );
     }
 
+    addSVGGroup(center_x: number, center_y: number) {
+        this.gearService.defaultFigure = d3.select('#svg').append('g');
+
+        let width = this.figure.nativeElement.offsetWidth / 2 - center_x;
+        let height = this.figure.nativeElement.offsetHeight / 2 - center_y;
+
+        let translate = 'translate(' + width + ', ' + height + ')';
+        let scale = 'scale(' + 4 + ', ' + 4 + ')';
+
+        this.gearService.defaultFigure?.attr(
+            'transform',
+            translate + ' ' + scale
+        );
+
+        //TODO set&get transform
+        //TODO set&get scale
+    }
+
     submitForm(): void {
+        d3.select('g').remove();
+
         this.dataModel = this.dataForm.value;
         let parameters = this.gearService.calculateCouplingParameters(
             this.dataModel.m,
@@ -96,8 +105,10 @@ export class GearPageComponent implements AfterViewInit, OnInit {
             this.dataModel.x1,
             this.dataModel.x2
         );
-        let result = this.gearService.generateGearMechanismPath(parameters);
 
+        this.addSVGGroup(parameters.MechanismData.CenterDistance, 0);
+
+        let result = this.gearService.generateGearMechanismPath(parameters);
         for (let item of result.MechanismGeometry || []) {
             this.gearService.showElement(item.path, undefined, item.attributes);
         }

@@ -230,11 +230,43 @@ export class GearCouplingCalculationService {
         );
 
         return [
-            { path: dedendumGeometry, attributes: undefined } as GearGeometry,
-            { path: baseGeometry, attributes: undefined } as GearGeometry,
-            { path: refPitchGeometry, attributes: undefined } as GearGeometry,
-            { path: workPitchGeometry, attributes: undefined } as GearGeometry,
-            { path: addendumGeometry, attributes: undefined } as GearGeometry,
+            {
+                path: dedendumGeometry,
+                attributes: [
+                    { key: 'stroke', value: 'black' },
+                    { key: 'stroke-width', value: '0.75' },
+                ],
+            } as GearGeometry,
+            {
+                path: baseGeometry,
+                attributes: [
+                    { key: 'stroke', value: 'black' },
+                    { key: 'stroke-width', value: '0.75' },
+                    { key: 'stroke-dasharray', value: '1 1' },
+                ],
+            } as GearGeometry,
+            {
+                path: refPitchGeometry,
+                attributes: [
+                    { key: 'stroke', value: 'black' },
+                    { key: 'stroke-width', value: '0.75' },
+                    { key: 'stroke-dasharray', value: '2 1' },
+                ],
+            } as GearGeometry,
+            {
+                path: workPitchGeometry,
+                attributes: [
+                    { key: 'stroke', value: 'black' },
+                    { key: 'stroke-width', value: '1' },
+                ],
+            } as GearGeometry,
+            {
+                path: addendumGeometry,
+                attributes: [
+                    { key: 'stroke', value: 'black' },
+                    { key: 'stroke-width', value: '0.75' },
+                ],
+            } as GearGeometry,
         ];
     }
 
@@ -334,15 +366,6 @@ export class GearCouplingCalculationService {
                 )
             );
         }
-
-        //TODO remove
-        let path = d3.path();
-        path.moveTo(0, 0);
-        for (let item of list) {
-            path.lineTo(item.x, item.y);
-        }
-        this.showElement(path).attr('stroke', 'red');
-        //TODO remove
 
         return list;
     }
@@ -447,10 +470,10 @@ export class GearCouplingCalculationService {
         let firstPoint = <Point>pointCollection.values().next().value;
         Result.moveTo(firstPoint.x, firstPoint.y);
 
-        //let newPointCollection = new Map<number, Point>();
-        //let i = 0;
+        // let newPointCollection = new Map<number, Point>();
+        // let i = 0;
         // pointCollection.forEach((value, key, map) => {
-        //     if (i <= 15) {
+        //     if (i <= 19) {
         //         newPointCollection.set(key, value);
         //         i++;
         //     }
@@ -662,7 +685,10 @@ export class GearCouplingCalculationService {
                 pinionAngles,
                 new Point(0, 0)
             ),
-            attributes: undefined,
+            attributes: [
+                { key: 'stroke', value: 'orange' },
+                { key: 'stroke-width', value: '1' },
+            ],
         });
 
         var Offset =
@@ -687,7 +713,10 @@ export class GearCouplingCalculationService {
                 gearAngles,
                 new Point(data.MechanismData.CenterDistance, 0)
             ),
-            attributes: undefined,
+            attributes: [
+                { key: 'stroke', value: 'red' },
+                { key: 'stroke-width', value: '1' },
+            ],
         });
 
         var Result = {
@@ -695,7 +724,6 @@ export class GearCouplingCalculationService {
             MechanismGeometry: GearElements,
         } as CalculationsResultsData;
 
-        let test;
         return Result;
     }
 
@@ -720,14 +748,17 @@ export class GearCouplingCalculationService {
         }
 
         if (attributes == undefined) {
-            result.attr('stroke', 'black').attr('fill', 'none');
+            result.attr('stroke', 'black');
         } else {
             for (let entry of attributes) {
                 result = result.attr(entry.key, entry.value);
             }
         }
 
-        return result;
+        return result
+            .attr('fill', 'none')
+            .attr('stroke-linecap', 'round')
+            .attr('stroke-linejoin', 'round');
     }
 
     constructor() {}

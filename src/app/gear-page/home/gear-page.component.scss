@@ -17,6 +17,13 @@
     margin-bottom: 24px;
 }
 
+#svg {
+    height: 100%;
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+}
+
 .gear-page {
     display: flex;
     flex-flow: row;

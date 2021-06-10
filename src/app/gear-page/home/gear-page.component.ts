@@ -1,17 +1,17 @@
 import {
-    AfterViewChecked,
     AfterViewInit,
     Component,
     ElementRef,
-    Input,
     OnInit,
     ViewChild,
 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { GearCouplingCalculationService } from '../services/gear-coupling-dimension.service';
 
 import * as d3 from 'd3';
-import { Point } from '../services/gear-coupling-dimension.model';
+import { Point } from 'src/app/models/math-utils.model';
+import { GearVisualizationService } from 'src/app/services/animation/gear-visualization.service';
+import { GearGeometryService } from 'src/app/services/gear-geometry/gear-geometry.service';
+import { GearParametersService } from 'src/app/services/gear-parameters/gear-parameters.service';
 
 export interface GearMechanismInputData {
     m: number;
@@ -19,6 +19,12 @@ export interface GearMechanismInputData {
     z2: number;
     x1: number;
     x2: number;
+}
+
+export enum PlayerState {
+    PAUSED,
+    PLAYING,
+    STOPPED,
 }
 
 @Component({
@@ -39,22 +45,19 @@ export class GearPageComponent implements AfterViewInit, OnInit {
         x2: 0.6032,
     } as GearMechanismInputData;
 
-    sliderValue = 7;
-    hasStarted = false;
+    sliderScale = 7;
     mechanismCenter: Point = new Point(0, 0);
 
+    playerState = PlayerState.STOPPED;
+    pinionRotationAngle = 0;
+    gearRotationAngle = 0;
+
     constructor(
-        private gearService: GearCouplingCalculationService,
+        private geometryService: GearGeometryService,
+        private parametersService: GearParametersService,
+        private visualService: GearVisualizationService,
         private formBuilder: FormBuilder
     ) {}
-
-    onSliderChange(value: number) {
-        this.updateGroupTransform(
-            value,
-            this.mechanismCenter.x,
-            this.mechanismCenter.y
-        );
-    }
 
     ngOnInit() {
         this.dataForm = this.formBuilder.group({
@@ -73,50 +76,59 @@ export class GearPageComponent implements AfterViewInit, OnInit {
     }
 
     ngAfterViewInit() {
-        //d3.select('svg').selectChild().remove();
-
-        this.gearService.defaultFigure = d3.select('#svg').append('g');
-
-        this.tick();
+        this.visualService.defaultFigure = d3.select('#svg').append('g');
     }
 
-    tick() {
-        //requestAnimationFrame(() => this.tick());
-        //const ctx = this.context;
-        //ctx.clearRect( 0, 0, 600, 400 );
+    onSliderChange(value: number) {
+        this.updateGroupTransform(
+            value,
+            value,
+            this.mechanismCenter.x,
+            this.mechanismCenter.y
+        );
     }
 
-    updateGroupTransform(scale: number, center_x: number, center_y: number) {
+    updateGroupTransform(
+        scale_x: number,
+        scale_y: number,
+        center_x: number,
+        center_y: number
+    ) {
         let x =
-            (this.figure.nativeElement.offsetWidth - center_x * scale * 2) /
+            (this.figure.nativeElement.offsetWidth - center_x * scale_x * 2) /
             2 /
-            scale;
+            scale_x;
         let y =
-            (this.figure.nativeElement.offsetHeight - center_y * scale * 2) /
+            (this.figure.nativeElement.offsetHeight - center_y * scale_y * 2) /
             2 /
-            scale;
+            scale_y;
 
         let translate = 'translate(' + x + ', ' + y + ')';
-        let scaleString = 'scale(' + scale + ', ' + scale + ')';
+        let scaleString = 'scale(' + scale_x + ', ' + scale_y + ')';
 
-        this.gearService.defaultFigure?.attr(
+        this.visualService.defaultFigure?.attr(
             'transform',
             scaleString + ' ' + translate
         );
     }
 
-    addSVGGroup(center_x: number, center_y: number) {
-        this.gearService.defaultFigure = d3.select('#svg').append('g');
+    addPathGroup(center_x: number, center_y: number) {
+        this.visualService.defaultFigure = d3.select('#svg').append('g');
         this.mechanismCenter = new Point(center_x, center_y);
 
-        this.updateGroupTransform(this.sliderValue, center_x, center_y);
+        this.updateGroupTransform(
+            this.sliderScale,
+            this.sliderScale,
+            center_x,
+            center_y
+        );
     }
 
     submitForm(): void {
         d3.select('g').remove();
 
         this.dataModel = this.dataForm.value;
-        let parameters = this.gearService.calculateCouplingParameters(
+        let parameters = this.parametersService.calculateCouplingParameters(
             this.dataModel.m,
             this.dataModel.z1,
             this.dataModel.z2,
@@ -124,14 +136,32 @@ export class GearPageComponent implements AfterViewInit, OnInit {
             this.dataModel.x2
         );
 
-        this.addSVGGroup(
+        this.addPathGroup(
             parameters.ActionPosition.x,
             parameters.ActionPosition.y
         );
 
-        let result = this.gearService.generateGearMechanismPath(parameters);
+        let result = this.geometryService.generateGearMechanismPath(parameters);
         for (let item of result.MechanismGeometry || []) {
-            this.gearService.showElement(item.path, undefined, item.attributes);
+            this.visualService.showElement(
+                item.path,
+                undefined,
+                item.attributes
+            );
         }
     }
+
+    isPlaying() {
+        return this.playerState == PlayerState.PLAYING;
+    }
+
+    hasPaused() {
+        return this.playerState == PlayerState.PAUSED;
+    }
+
+    hasStopped() {
+        return this.playerState == PlayerState.STOPPED;
+    }
+
+    startAnimation() {}
 }

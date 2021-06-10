@@ -1,14 +1,14 @@
 import { TestBed } from '@angular/core/testing';
-import { Point } from './gear-coupling-dimension.model';
+import { Point } from 'src/app/models/math-utils.model';
 
-import { GearCouplingCalculationService } from './gear-coupling-dimension.service';
+import { MathUtilsService } from './math-utils.service';
 
-describe('GearCouplingDimensionService', () => {
-    let service: GearCouplingCalculationService;
+describe('MathUtilsService', () => {
+    let service: MathUtilsService;
 
     beforeEach(() => {
         TestBed.configureTestingModule({});
-        service = TestBed.inject(GearCouplingCalculationService);
+        service = TestBed.inject(MathUtilsService);
     });
 
     it('should be created', () => {

@@ -6,12 +6,12 @@ import {
     ViewChild,
 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-
-import * as d3 from 'd3';
-import { Point } from 'src/app/models/math-utils.model';
-import { GearVisualizationService } from 'src/app/services/animation/gear-visualization.service';
+import { GearVisualizationService } from 'src/app/services/gear-visualization/gear-visualization.service';
 import { GearGeometryService } from 'src/app/services/gear-geometry/gear-geometry.service';
 import { GearParametersService } from 'src/app/services/gear-parameters/gear-parameters.service';
+import { CalculationsResultsData } from 'src/app/models/gear-parameters.model';
+
+import * as d3 from 'd3';
 
 export interface GearMechanismInputData {
     m: number;
@@ -46,9 +46,12 @@ export class GearPageComponent implements AfterViewInit, OnInit {
     } as GearMechanismInputData;
 
     sliderScale = 7;
-    mechanismCenter: Point = new Point(0, 0);
+    mechanismData?: CalculationsResultsData = undefined;
 
     playerState = PlayerState.STOPPED;
+    gearPath?: d3.Selection<SVGPathElement, unknown, HTMLElement, any>;
+    pinionPath?: d3.Selection<SVGPathElement, unknown, HTMLElement, any>;
+
     pinionRotationAngle = 0;
     gearRotationAngle = 0;
 
@@ -83,17 +86,26 @@ export class GearPageComponent implements AfterViewInit, OnInit {
         this.updateGroupTransform(
             value,
             value,
-            this.mechanismCenter.x,
-            this.mechanismCenter.y
+            this.mechanismData?.ActionPosition.x,
+            this.mechanismData?.ActionPosition.y
         );
     }
 
     updateGroupTransform(
-        scale_x: number,
-        scale_y: number,
-        center_x: number,
-        center_y: number
+        scale_x?: number,
+        scale_y?: number,
+        center_x?: number,
+        center_y?: number
     ) {
+        if (
+            scale_x == undefined ||
+            scale_y == undefined ||
+            center_x == undefined ||
+            center_y == undefined
+        ) {
+            throw new Error('[updateGroupTransform] data has not been found');
+        }
+
         let x =
             (this.figure.nativeElement.offsetWidth - center_x * scale_x * 2) /
             2 /
@@ -114,7 +126,6 @@ export class GearPageComponent implements AfterViewInit, OnInit {
 
     addPathGroup(center_x: number, center_y: number) {
         this.visualService.defaultFigure = d3.select('#svg').append('g');
-        this.mechanismCenter = new Point(center_x, center_y);
 
         this.updateGroupTransform(
             this.sliderScale,
@@ -128,7 +139,7 @@ export class GearPageComponent implements AfterViewInit, OnInit {
         d3.select('g').remove();
 
         this.dataModel = this.dataForm.value;
-        let parameters = this.parametersService.calculateCouplingParameters(
+        this.mechanismData = this.parametersService.calculateCouplingParameters(
             this.dataModel.m,
             this.dataModel.z1,
             this.dataModel.z2,
@@ -137,17 +148,28 @@ export class GearPageComponent implements AfterViewInit, OnInit {
         );
 
         this.addPathGroup(
-            parameters.ActionPosition.x,
-            parameters.ActionPosition.y
+            this.mechanismData.ActionPosition.x,
+            this.mechanismData.ActionPosition.y
         );
 
-        let result = this.geometryService.generateGearMechanismPath(parameters);
+        let result = this.geometryService.generateGearMechanismPath(
+            this.mechanismData
+        );
         for (let item of result.MechanismGeometry || []) {
-            this.visualService.showElement(
+            let pathElement = this.visualService.showElement(
                 item.path,
                 undefined,
                 item.attributes
             );
+
+            switch (item?.name) {
+                case 'pinion':
+                    this.pinionPath = pathElement;
+                    break;
+                case 'gear':
+                    this.gearPath = pathElement;
+                    break;
+            }
         }
     }
 
@@ -163,5 +185,52 @@ export class GearPageComponent implements AfterViewInit, OnInit {
         return this.playerState == PlayerState.STOPPED;
     }
 
-    startAnimation() {}
+    startAnimation() {
+        if (this.pinionPath && this.gearPath) {
+            if (this.hasPaused()) {
+                this.visualService.startAnimation(
+                    this.pinionPath,
+                    this.gearPath,
+                    this.mechanismData?.MechanismData.TransmissionRatio,
+                    this.mechanismData?.PinionPosition,
+                    this.mechanismData?.GearPosition,
+                    this.pinionRotationAngle,
+                    this.gearRotationAngle
+                );
+            } else if (this.hasStopped()) {
+                this.visualService.startAnimation(
+                    this.pinionPath,
+                    this.gearPath,
+                    this.mechanismData?.MechanismData.TransmissionRatio,
+                    this.mechanismData?.PinionPosition,
+                    this.mechanismData?.GearPosition
+                );
+            }
+            this.playerState = PlayerState.PLAYING;
+        }
+    }
+
+    stopAnimation() {
+        if (this.pinionPath && this.gearPath) {
+            this.visualService.stopAnimation(this.pinionPath, this.gearPath);
+            this.gearRotationAngle = 0;
+            this.pinionRotationAngle = 0;
+        }
+
+        this.playerState = PlayerState.STOPPED;
+    }
+
+    pauseAnimation() {
+        if (this.pinionPath && this.gearPath) {
+            let result = this.visualService.pauseAnimation(
+                this.pinionPath,
+                this.gearPath
+            );
+
+            this.pinionRotationAngle = result?.pinionAnimationAngle || 0;
+            this.gearRotationAngle = result?.gearAnimationAngle || 0;
+        }
+
+        this.playerState = PlayerState.PAUSED;
+    }
 }

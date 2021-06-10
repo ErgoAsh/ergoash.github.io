@@ -276,6 +276,7 @@ export class GearGeometryService {
         pointCollection.forEach((value, key, map) => {
             Result.lineTo(value.x, value.y);
         });
+        Result.lineTo(firstPoint.x, firstPoint.y);
         return Result;
     }
 
@@ -330,6 +331,7 @@ export class GearGeometryService {
                 { key: 'stroke', value: 'orange' },
                 { key: 'stroke-width', value: '1' },
             ],
+            name: 'pinion',
         });
 
         var Offset =
@@ -360,6 +362,7 @@ export class GearGeometryService {
                 { key: 'stroke', value: 'red' },
                 { key: 'stroke-width', value: '1' },
             ],
+            name: 'gear',
         });
 
         var Result = {

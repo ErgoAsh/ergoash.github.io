@@ -13,6 +13,7 @@ export interface GearGeometry {
         key: string;
         value: string;
     }[];
+    name?: string;
 }
 
 export interface CalculationsResultsData {

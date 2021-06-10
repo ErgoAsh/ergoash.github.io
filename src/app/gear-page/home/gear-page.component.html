@@ -6,7 +6,8 @@
         <div class="canvas-grid">
             <div class="blank-space">&nbsp;</div>
             <div class="gear-slider">
-                <nz-slider [(ngModel)]="sliderValue"></nz-slider>
+                <nz-slider [(ngModel)]="sliderValue" [nzMin]="1" [nzMax]="10" [nzStep]="0.1" (ngModelChange)="onSliderChange($event)">
+                </nz-slider>
                 
                 <div>
                     <button nz-button nzType="primary" *ngIf="hasStarted">

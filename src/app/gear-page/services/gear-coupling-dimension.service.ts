@@ -408,7 +408,7 @@ export class GearCouplingCalculationService {
                     break;
 
                 case CurveType.RisingInvolute:
-                    if (previousType != CurveType.RisingInvolute) continue;
+                    if (previousType != CurveType.RisingInvolute) break;
 
                     let risingInvolute = this.rotateInvolute(
                         this.translateInvolute(
@@ -427,7 +427,7 @@ export class GearCouplingCalculationService {
                     break;
 
                 case CurveType.ReturningInvolute:
-                    if (previousType != CurveType.ReturningInvolute) continue;
+                    if (previousType != CurveType.ReturningInvolute) break;
 
                     let returningInvolute = this.rotateInvolute(
                         this.translateInvolute(
@@ -436,7 +436,7 @@ export class GearCouplingCalculationService {
                             Center.y
                         ),
                         Center,
-                        previousTheta
+                        theta
                     );
 
                     let returningTh = this.linspace(10, previousTheta, theta);
@@ -461,6 +461,7 @@ export class GearCouplingCalculationService {
                     break;
             }
             previousTheta = theta;
+            previousType = type;
         }
         // var aa = d3.line()(points.map((point) => {
         //     return [point.x, point.y]

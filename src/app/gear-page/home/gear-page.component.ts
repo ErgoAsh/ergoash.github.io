@@ -11,6 +11,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { GearCouplingCalculationService } from '../services/gear-coupling-dimension.service';
 
 import * as d3 from 'd3';
+import { Point } from '../services/gear-coupling-dimension.model';
 
 export interface GearMechanismInputData {
     m: number;
@@ -38,13 +39,22 @@ export class GearPageComponent implements AfterViewInit, OnInit {
         x2: 0.6032,
     } as GearMechanismInputData;
 
-    sliderValue = 0;
+    sliderValue = 7;
     hasStarted = false;
+    mechanismCenter: Point = new Point(0, 0);
 
     constructor(
         private gearService: GearCouplingCalculationService,
         private formBuilder: FormBuilder
     ) {}
+
+    onSliderChange(value: number) {
+        this.updateGroupTransform(
+            value,
+            this.mechanismCenter.x,
+            this.mechanismCenter.y
+        );
+    }
 
     ngOnInit() {
         this.dataForm = this.formBuilder.group({
@@ -76,22 +86,24 @@ export class GearPageComponent implements AfterViewInit, OnInit {
         //ctx.clearRect( 0, 0, 600, 400 );
     }
 
-    addSVGGroup(center_x: number, center_y: number) {
-        this.gearService.defaultFigure = d3.select('#svg').append('g');
-
+    updateGroupTransform(scale: number, center_x: number, center_y: number) {
         let width = this.figure.nativeElement.offsetWidth / 2 - center_x;
         let height = this.figure.nativeElement.offsetHeight / 2 - center_y;
 
         let translate = 'translate(' + width + ', ' + height + ')';
-        let scale = 'scale(' + 4 + ', ' + 4 + ')';
+        let scaleString = 'scale(' + scale + ', ' + scale + ')';
 
         this.gearService.defaultFigure?.attr(
             'transform',
-            translate + ' ' + scale
+            translate + ' ' + scaleString
         );
+    }
 
-        //TODO set&get transform
-        //TODO set&get scale
+    addSVGGroup(center_x: number, center_y: number) {
+        this.gearService.defaultFigure = d3.select('#svg').append('g');
+        this.mechanismCenter = new Point(center_x, center_y);
+
+        this.updateGroupTransform(this.sliderValue, center_x, center_y);
     }
 
     submitForm(): void {

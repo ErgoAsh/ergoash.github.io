@@ -87,15 +87,21 @@ export class GearPageComponent implements AfterViewInit, OnInit {
     }
 
     updateGroupTransform(scale: number, center_x: number, center_y: number) {
-        let width = this.figure.nativeElement.offsetWidth / 2 - center_x;
-        let height = this.figure.nativeElement.offsetHeight / 2 - center_y;
+        let x =
+            (this.figure.nativeElement.offsetWidth - center_x * scale * 2) /
+            2 /
+            scale;
+        let y =
+            (this.figure.nativeElement.offsetHeight - center_y * scale * 2) /
+            2 /
+            scale;
 
-        let translate = 'translate(' + width + ', ' + height + ')';
+        let translate = 'translate(' + x + ', ' + y + ')';
         let scaleString = 'scale(' + scale + ', ' + scale + ')';
 
         this.gearService.defaultFigure?.attr(
             'transform',
-            translate + ' ' + scaleString
+            scaleString + ' ' + translate
         );
     }
 
@@ -118,7 +124,10 @@ export class GearPageComponent implements AfterViewInit, OnInit {
             this.dataModel.x2
         );
 
-        this.addSVGGroup(parameters.MechanismData.CenterDistance, 0);
+        this.addSVGGroup(
+            parameters.ActionPosition.x,
+            parameters.ActionPosition.y
+        );
 
         let result = this.gearService.generateGearMechanismPath(parameters);
         for (let item of result.MechanismGeometry || []) {

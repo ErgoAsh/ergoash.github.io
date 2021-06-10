@@ -463,22 +463,10 @@ export class GearCouplingCalculationService {
             previousTheta = theta;
             previousType = type;
         }
-        // var aa = d3.line()(points.map((point) => {
-        //     return [point.x, point.y]
-        // }) as [number, number][]);
 
         var Result = d3.path();
         let firstPoint = <Point>pointCollection.values().next().value;
         Result.moveTo(firstPoint.x, firstPoint.y);
-
-        // let newPointCollection = new Map<number, Point>();
-        // let i = 0;
-        // pointCollection.forEach((value, key, map) => {
-        //     if (i <= 19) {
-        //         newPointCollection.set(key, value);
-        //         i++;
-        //     }
-        // });
 
         pointCollection.forEach((value, key, map) => {
             Result.lineTo(value.x, value.y);

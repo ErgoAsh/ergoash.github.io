@@ -1,12 +1,26 @@
 <div class="gear-page">
     <div class="gear-canvas">
-        <div id="figure" class="canvas-grid" #figure>
-            <svg:svg id="svg"></svg:svg>
+        <div class="canvas-grid">
+            <nz-tabset nzType="card">
+                <nz-tab nzTitle="Preview">
+                    <div id="figure" class="canvas-grid" #figure>
+                        <svg:svg id="svg"></svg:svg>
+                    </div>
+                </nz-tab>
+    
+                <nz-tab nzTitle="Parameter information table">
+                    lorem ipsum
+                </nz-tab>
+            </nz-tabset>
         </div>
         <div class="canvas-grid">
             <div class="blank-space">&nbsp;</div>
             <div class="gear-slider">
-                <nz-slider [(ngModel)]="sliderScale" [nzMin]="1" [nzMax]="15" [nzStep]="0.1" (ngModelChange)="onSliderChange($event)">
+                <nz-slider [(ngModel)]="sliderScale" 
+                    [nzMin]="1" 
+                    [nzMax]="15" 
+                    [nzStep]="0.1" 
+                    (ngModelChange)="onSliderChange($event)">
                 </nz-slider>
                 
                 <div>

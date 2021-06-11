@@ -17,6 +17,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ZorroAntdModule } from './app-zorro.module';
+import { KatexModule } from 'ng-katex';
 
 registerLocaleData(en);
 
@@ -35,6 +36,7 @@ registerLocaleData(en);
         HttpClientModule,
         BrowserAnimationsModule,
 
+        KatexModule,
         ZorroAntdModule,
     ],
     providers: [{ provide: NZ_I18N, useValue: en_US }],

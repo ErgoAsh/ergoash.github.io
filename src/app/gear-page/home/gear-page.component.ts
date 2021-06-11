@@ -46,7 +46,7 @@ export class GearPageComponent implements AfterViewInit, OnInit {
     } as GearMechanismInputData;
 
     sliderScale = 7;
-    mechanismData?: CalculationsResultsData = undefined;
+    mechanismData?: CalculationsResultsData;
 
     playerState = PlayerState.STOPPED;
     gearPath?: d3.Selection<SVGPathElement, unknown, HTMLElement, any>;
@@ -54,6 +54,8 @@ export class GearPageComponent implements AfterViewInit, OnInit {
 
     pinionRotationAngle = 0;
     gearRotationAngle = 0;
+
+    hasDataBeenCalculated = false;
 
     constructor(
         private geometryService: GearGeometryService,
@@ -155,6 +157,8 @@ export class GearPageComponent implements AfterViewInit, OnInit {
         let result = this.geometryService.generateGearMechanismPath(
             this.mechanismData
         );
+        this.hasDataBeenCalculated = true;
+
         for (let item of result.MechanismGeometry || []) {
             let pathElement = this.visualService.showElement(
                 item.path,

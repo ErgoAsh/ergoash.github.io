@@ -3,6 +3,15 @@
     height: 100%;
 }
 
+nz-tabset {
+    height: 100%;
+    width: 100%;
+}
+nz-tabset * {
+    height: 100%;
+    width: 100%;
+}
+
 #canvas {
     grid-area: 1 / 1;
 
@@ -39,9 +48,6 @@
 
     width: 100%;
     margin-right: 25px;
-
-    border: 1px lightgray solid;
-    border-radius: 1px;
 }
 
 .gear-settings {
@@ -58,9 +64,8 @@
 
     width: 250px;
     padding: 10px;
-    border-left: 1px lightgray solid;
-    border-top: 1px lightgray solid;
-    border-right: 1px lightgray solid;
+    border: 1px lightgray solid;
+
     background-color: white;
 
     button {

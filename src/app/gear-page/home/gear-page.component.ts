@@ -12,6 +12,7 @@ import { GearParametersService } from 'src/app/services/gear-parameters/gear-par
 import { CalculationsResultsData } from 'src/app/models/gear-parameters.model';
 
 import * as d3 from 'd3';
+import * as Two from 'twojs-ts';
 
 export interface GearMechanismInputData {
     m: number;

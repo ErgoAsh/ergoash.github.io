@@ -31,8 +31,8 @@ export class MathUtilsService {
             let angle2 = angle1;
             angle1 = Math.atan(angle1 + involute);
 
-            let Diff = Math.abs(angle1 - angle2);
-            if (Diff < Math.pow(10, -10)) {
+            let diff = Math.abs(angle1 - angle2);
+            if (diff < Math.pow(10, -10)) {
                 break;
             }
         }

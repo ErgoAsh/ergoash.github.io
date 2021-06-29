@@ -7,10 +7,6 @@ nz-tabset {
     height: 100%;
     width: 100%;
 }
-nz-tabset * {
-    height: 100%;
-    width: 100%;
-}
 
 #canvas {
     grid-area: 1 / 1;
@@ -24,6 +20,13 @@ nz-tabset * {
 #calculate-button {
     width: 100%;
     margin-bottom: 24px;
+}
+
+#figure {
+    height: 100%;
+    border-left: 1px solid #f0f0f0;
+    border-right: 1px solid #f0f0f0;
+    border-bottom: 1px solid #f0f0f0;
 }
 
 #svg {
@@ -64,7 +67,7 @@ nz-tabset * {
 
     width: 250px;
     padding: 10px;
-    border: 1px lightgray solid;
+    border: 1px solid #f0f0f0;
 
     background-color: white;
 

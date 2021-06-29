@@ -81,6 +81,13 @@ export class GearPageComponent implements AfterViewInit, OnInit {
     }
 
     ngAfterViewInit(): void {
+        // Hack making NG-ZORRO tab flex box as tall as it's supposed to
+        const cnt = document.querySelector('.ant-tabs-content') as HTMLElement;
+        const nav = document.querySelector('.ant-tabs-nav') as HTMLElement;
+
+        cnt.style.height = '100%';
+        nav.style.margin = '0px';
+
         this.visualService.defaultFigure = d3.select('#svg').append('g');
     }
 
@@ -109,9 +116,9 @@ export class GearPageComponent implements AfterViewInit, OnInit {
         }
 
         const x =
-            this.figure.nativeElement.offsetWidth * (0.5 * scaleX) - centerX;
+            this.figure.nativeElement.offsetWidth / (2 * scaleX) - centerX;
         const y =
-            this.figure.nativeElement.offsetHeight * (0.5 * scaleY) - centerY;
+            this.figure.nativeElement.offsetHeight / (2 * scaleY) - centerY;
 
         const translate = 'translate(' + x + ', ' + y + ')';
         const scaleString = 'scale(' + scaleX + ', ' + scaleY + ')';

@@ -12,7 +12,6 @@ import { GearParametersService } from 'src/app/services/gear-parameters/gear-par
 import { CalculationsResultsData } from 'src/app/models/gear-parameters.model';
 
 import * as d3 from 'd3';
-import * as Two from 'twojs-ts';
 
 export interface GearMechanismInputData {
     m: number;
@@ -29,7 +28,7 @@ export enum PlayerState {
 }
 
 @Component({
-    selector: 'gear-page',
+    selector: 'app-gear-page',
     templateUrl: './gear-page.component.html',
     styleUrls: ['./gear-page.component.scss'],
 })
@@ -65,7 +64,7 @@ export class GearPageComponent implements AfterViewInit, OnInit {
         private formBuilder: FormBuilder
     ) {}
 
-    ngOnInit() {
+    ngOnInit(): void {
         this.dataForm = this.formBuilder.group({
             m: [this.dataModel.m, [Validators.required, Validators.min(0.001)]],
             z1: [this.dataModel.z1, [Validators.required, Validators.min(10)]],
@@ -81,11 +80,11 @@ export class GearPageComponent implements AfterViewInit, OnInit {
         });
     }
 
-    ngAfterViewInit() {
+    ngAfterViewInit(): void {
         this.visualService.defaultFigure = d3.select('#svg').append('g');
     }
 
-    onSliderChange(value: number) {
+    onSliderChange(value: number): void {
         this.updateGroupTransform(
             value,
             value,
@@ -95,31 +94,27 @@ export class GearPageComponent implements AfterViewInit, OnInit {
     }
 
     updateGroupTransform(
-        scale_x?: number,
-        scale_y?: number,
-        center_x?: number,
-        center_y?: number
-    ) {
+        scaleX?: number,
+        scaleY?: number,
+        centerX?: number,
+        centerY?: number
+    ): void {
         if (
-            scale_x == undefined ||
-            scale_y == undefined ||
-            center_x == undefined ||
-            center_y == undefined
+            scaleX === undefined ||
+            scaleY === undefined ||
+            centerX === undefined ||
+            centerY === undefined
         ) {
             throw new Error('[updateGroupTransform] data has not been found');
         }
 
-        let x =
-            (this.figure.nativeElement.offsetWidth - center_x * scale_x * 2) /
-            2 /
-            scale_x;
-        let y =
-            (this.figure.nativeElement.offsetHeight - center_y * scale_y * 2) /
-            2 /
-            scale_y;
+        const x =
+            this.figure.nativeElement.offsetWidth * (0.5 * scaleX) - centerX;
+        const y =
+            this.figure.nativeElement.offsetHeight * (0.5 * scaleY) - centerY;
 
-        let translate = 'translate(' + x + ', ' + y + ')';
-        let scaleString = 'scale(' + scale_x + ', ' + scale_y + ')';
+        const translate = 'translate(' + x + ', ' + y + ')';
+        const scaleString = 'scale(' + scaleX + ', ' + scaleY + ')';
 
         this.visualService.defaultFigure?.attr(
             'transform',
@@ -127,14 +122,14 @@ export class GearPageComponent implements AfterViewInit, OnInit {
         );
     }
 
-    addPathGroup(center_x: number, center_y: number) {
+    addPathGroup(centerX: number, centerY: number): void {
         this.visualService.defaultFigure = d3.select('#svg').append('g');
 
         this.updateGroupTransform(
             this.sliderScale,
             this.sliderScale,
-            center_x,
-            center_y
+            centerX,
+            centerY
         );
     }
 
@@ -155,13 +150,13 @@ export class GearPageComponent implements AfterViewInit, OnInit {
             this.mechanismData.ActionPosition.y
         );
 
-        let result = this.geometryService.generateGearMechanismPath(
+        const result = this.geometryService.generateGearMechanismPath(
             this.mechanismData
         );
         this.hasDataBeenCalculated = true;
 
-        for (let item of result.MechanismGeometry || []) {
-            let pathElement = this.visualService.showElement(
+        for (const item of result.MechanismGeometry || []) {
+            const pathElement = this.visualService.showElement(
                 item.path,
                 undefined,
                 item.attributes
@@ -178,19 +173,19 @@ export class GearPageComponent implements AfterViewInit, OnInit {
         }
     }
 
-    isPlaying() {
-        return this.playerState == PlayerState.PLAYING;
+    isPlaying(): boolean {
+        return this.playerState === PlayerState.PLAYING;
     }
 
-    hasPaused() {
-        return this.playerState == PlayerState.PAUSED;
+    hasPaused(): boolean {
+        return this.playerState === PlayerState.PAUSED;
     }
 
-    hasStopped() {
-        return this.playerState == PlayerState.STOPPED;
+    hasStopped(): boolean {
+        return this.playerState === PlayerState.STOPPED;
     }
 
-    startAnimation() {
+    startAnimation(): void {
         if (this.pinionPath && this.gearPath) {
             if (this.hasPaused()) {
                 this.visualService.startAnimation(
@@ -215,7 +210,7 @@ export class GearPageComponent implements AfterViewInit, OnInit {
         }
     }
 
-    stopAnimation() {
+    stopAnimation(): void {
         if (this.pinionPath && this.gearPath) {
             this.visualService.stopAnimation(this.pinionPath, this.gearPath);
             this.gearRotationAngle = 0;
@@ -225,9 +220,9 @@ export class GearPageComponent implements AfterViewInit, OnInit {
         this.playerState = PlayerState.STOPPED;
     }
 
-    pauseAnimation() {
+    pauseAnimation(): void {
         if (this.pinionPath && this.gearPath) {
-            let result = this.visualService.pauseAnimation(
+            const result = this.visualService.pauseAnimation(
                 this.pinionPath,
                 this.gearPath
             );

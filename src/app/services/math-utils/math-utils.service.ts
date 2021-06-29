@@ -28,10 +28,10 @@ export class MathUtilsService {
         let angle1 = 0;
 
         while (true) {
-            let angle2 = angle1;
+            const angle2 = angle1;
             angle1 = Math.atan(angle1 + involute);
 
-            let diff = Math.abs(angle1 - angle2);
+            const diff = Math.abs(angle1 - angle2);
             if (diff < Math.pow(10, -10)) {
                 break;
             }
@@ -77,7 +77,7 @@ export class MathUtilsService {
         );
     }
 
-    public linspace(length: number, start: number, stop: number) {
+    public linspace(length: number, start: number, stop: number): number[] {
         if (typeof length === 'undefined')
             length = Math.max(Math.round(stop - start) + 1, 1);
 
@@ -85,7 +85,7 @@ export class MathUtilsService {
             return length === 1 ? [start] : [];
         }
 
-        let data = Array(length);
+        const data = Array(length);
         length--;
 
         for (let i = length; i >= 0; i--) {

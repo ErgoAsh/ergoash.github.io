@@ -7,7 +7,7 @@
                         <svg:svg id="svg"></svg:svg>
                     </div>
                 </nz-tab>
-    
+
                 <nz-tab nzTitle="Parameter information table">
                     lorem ipsum
                 </nz-tab>
@@ -16,28 +16,39 @@
         <div class="canvas-grid">
             <div class="blank-space">&nbsp;</div>
             <div class="gear-slider">
-                <nz-slider [(ngModel)]="sliderScale" 
-                    [nzMin]="1" 
-                    [nzMax]="15" 
-                    [nzStep]="0.1" 
-                    (ngModelChange)="onSliderChange($event)">
+                <nz-slider
+                    [(ngModel)]="sliderScale"
+                    [nzMin]="1"
+                    [nzMax]="15"
+                    [nzStep]="0.1"
+                    (ngModelChange)="onSliderChange($event)"
+                >
                 </nz-slider>
-                
+
                 <div>
-                    <button nz-button nzType="primary"
-                            *ngIf="isPlaying()" 
-                            (click)="pauseAnimation()">
+                    <button
+                        nz-button
+                        nzType="primary"
+                        *ngIf="isPlaying()"
+                        (click)="pauseAnimation()"
+                    >
                         <i nz-icon nzType="pause"></i>
                     </button>
-                    
-                    <button nz-button nzType="primary"
-                            *ngIf="!isPlaying()" 
-                            (click)="startAnimation()">
+
+                    <button
+                        nz-button
+                        nzType="primary"
+                        *ngIf="!isPlaying()"
+                        (click)="startAnimation()"
+                    >
                         <i nz-icon nzType="caret-right"></i>
                     </button>
 
-                    <button nz-button nzType="primary"
-                            (click)="stopAnimation()">
+                    <button
+                        nz-button
+                        nzType="primary"
+                        (click)="stopAnimation()"
+                    >
                         <i>&#x25a0;</i>
                     </button>
                 </div>

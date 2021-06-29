@@ -11,24 +11,16 @@ export class GearVisualizationService {
     private _pinionRotation?: string;
     private _gearRotation?: string;
 
-    private _pinionTransition?: d3.Transition<
-        SVGPathElement,
-        unknown,
-        HTMLElement,
-        any
-    >;
-    private _gearTransition?: d3.Transition<
-        SVGPathElement,
+    private _defaultFigure?: d3.Selection<
+        SVGGElement,
         unknown,
         HTMLElement,
         any
     >;
 
-    private _defaultFigure:
+    get defaultFigure():
         | d3.Selection<SVGGElement, unknown, HTMLElement, any>
-        | undefined;
-
-    get defaultFigure() {
+        | undefined {
         return this._defaultFigure;
     }
 
@@ -40,11 +32,11 @@ export class GearVisualizationService {
         element: d3.Path,
         figure?: d3.Selection<SVGGElement, unknown, HTMLElement, any>,
         attributes?: { key: string; value: string }[]
-    ) {
+    ): d3.Selection<SVGPathElement, unknown, HTMLElement, any> {
         let result = null;
 
-        if (figure == undefined) {
-            if (this.defaultFigure == undefined)
+        if (figure === undefined) {
+            if (this.defaultFigure === undefined)
                 throw new Error('Default SVG figure has not been specified');
 
             result = this.defaultFigure
@@ -54,17 +46,17 @@ export class GearVisualizationService {
             result = figure.append('path').attr('d', element.toString());
         }
 
-        if (attributes == undefined) {
+        if (attributes === undefined) {
             result.attr('stroke', 'black');
         } else {
-            for (let entry of attributes) {
+            for (const entry of attributes) {
                 result = result.attr(entry.key, entry.value);
             }
         }
 
         return result
             .attr('fill', 'none')
-            .attr('stroke-linecap', 'round') //TODO remove for circles
+            .attr('stroke-linecap', 'round') // TODO remove for circles
             .attr('stroke-linejoin', 'round');
     }
 
@@ -76,11 +68,11 @@ export class GearVisualizationService {
         gearCenter?: Point,
         pinionRotationAngle: number = 0,
         gearRotationAngle: number = 0
-    ) {
+    ): void {
         if (
-            transmissionRatio == undefined ||
-            pinionCenter == undefined ||
-            gearCenter == undefined
+            transmissionRatio === undefined ||
+            pinionCenter === undefined ||
+            gearCenter === undefined
         ) {
             throw new Error('[startAnimation] data has not been found');
         }
@@ -177,16 +169,23 @@ export class GearVisualizationService {
         pinion: d3.Selection<SVGPathElement, unknown, HTMLElement, any>,
         gear: d3.Selection<SVGPathElement, unknown, HTMLElement, any>
     ): { pinionAnimationAngle?: number; gearAnimationAngle?: number } | null {
-        let pinionAngle = this._pinionRotation?.match(
+        if (
+            this._pinionRotation === undefined ||
+            this._gearRotation === undefined
+        ) {
+            throw new Error('[pauseAnimation] Rotation object is undefined');
+        }
+
+        const pinionAngle = this._pinionRotation.match(
             /\d+\.\d+|\d+\b|\d+(?=\w)/g
         );
 
-        let gearAngle = this._gearRotation?.match(/\d+\.\d+|\d+\b|\d+(?=\w)/g);
+        const gearAngle = this._gearRotation.match(/\d+\.\d+|\d+\b|\d+(?=\w)/g);
 
         pinion.interrupt();
         gear.interrupt();
 
-        if (pinionAngle != undefined && gearAngle != undefined) {
+        if (pinionAngle !== null && gearAngle !== null) {
             return {
                 pinionAnimationAngle: parseFloat(pinionAngle[0]),
                 gearAnimationAngle: -parseFloat(gearAngle[0]),
@@ -199,7 +198,7 @@ export class GearVisualizationService {
     stopAnimation(
         pinion: d3.Selection<SVGPathElement, unknown, HTMLElement, any>,
         gear: d3.Selection<SVGPathElement, unknown, HTMLElement, any>
-    ) {
+    ): void {
         pinion.interrupt();
         gear.interrupt();
 

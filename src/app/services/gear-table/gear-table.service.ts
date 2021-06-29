@@ -9,13 +9,13 @@ export class GearTableService {
     constructor() {}
 
     getTableData(data: CalculationsResultsData): TableDataRow[] {
-        if (data == undefined) {
+        if (data === undefined) {
             throw new Error(
                 '[getTableData] Required data has not been provided'
             );
         }
 
-        let Result: TableDataRow[] = [
+        const Result: TableDataRow[] = [
             {
                 name: 'Module',
                 formula: 'm',

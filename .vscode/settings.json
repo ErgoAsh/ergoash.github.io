@@ -3,6 +3,9 @@
         "Antd",
         "Katex",
         "arccos",
+        "codelyzer",
+        "devkit",
+        "ghpages",
         "linspace",
         "nz",
         "tabset"

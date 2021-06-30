@@ -17,150 +17,196 @@ export class GearTableService {
 
         const Result: TableDataRow[] = [
             {
-                name: 'Module',
-                formula: 'm',
-                value: data.MechanismData.Module,
-                areValuesShared: true,
+                key: '1',
+                name: 'Mechanism basic data',
+                children: [
+                    {
+                        key: '1-1',
+                        name: 'Module',
+                        formula: 'm',
+                        valueLeft: data.MechanismData?.Module,
+                        useColumnSpan: true,
+                    },
+                    {
+                        key: '1-2',
+                        name: 'Number of teeth',
+                        formula: 'z',
+                        valueLeft: data.GearData?.NumberOfTeeth,
+                        valueRight: data.PinionData?.NumberOfTeeth,
+                        useColumnSpan: false,
+                    },
+                    {
+                        key: '1-3',
+                        name: 'Pressure angle',
+                        formula: '\\alpha',
+                        valueLeft: data.MechanismData?.PressureAngle,
+                        useColumnSpan: true,
+                    },
+                    {
+                        key: '1-4',
+                        name: 'Operating pressure angle',
+                        formula:
+                            "\\alpha' = inverseInvolute \\left(2\\tan{\\alpha}\\frac{x_1+x_2}{z_1+z_2}+inv{\\alpha} \\right)",
+                        valueLeft: data.MechanismData?.OperatingPressureAngle,
+                        useColumnSpan: true,
+                    },
+                    {
+                        key: '1-5',
+                        name: 'Transmission ratio',
+                        formula: 'i = \\frac{z_2}{z_1}',
+                        valueLeft: data.MechanismData?.TransmissionRatio,
+                        useColumnSpan: true,
+                    },
+                    {
+                        key: '1-6',
+                        name: 'Contact ratio',
+                        formula:
+                            '\\epsilon = \\frac{\\sqrt{(\\frac{d_{a1}}{2})^2 - (\\frac{d_{b1}}{2})^2} + \\sqrt{(\\frac{d_{a2}}{2})^2 - (\\frac{d_{b2}}{2})^2} + a \\sin{\\alpha}}{\\pi m \\cos{\\alpha}}',
+                        valueLeft: data.MechanismData?.ContactRatio,
+                        useColumnSpan: true,
+                    },
+                ],
             },
             {
-                name: 'Number of teeth',
-                formula: 'z',
-                value: data.GearData.NumberOfTeeth,
-                valueSecondary: data.PinionData.NumberOfTeeth,
-                areValuesShared: false,
+                key: '2',
+                name: 'Circle diameters',
+                children: [
+                    {
+                        key: '2-1',
+                        name: 'Reference pitch circle diameter',
+                        formula: 'd = zm',
+                        valueLeft: data.GearData?.ReferencePitchDiameter,
+                        valueRight: data.PinionData?.ReferencePitchDiameter,
+                        useColumnSpan: false,
+                    },
+                    {
+                        key: '2-2',
+                        name: 'Base circle diameter',
+                        formula: 'd_b = d\\cos{\\alpha}',
+                        valueLeft: data.GearData?.BaseCircleDiameter,
+                        valueRight: data.PinionData?.BaseCircleDiameter,
+                        useColumnSpan: false,
+                    },
+                    {
+                        key: '2-3',
+                        name: 'Operating pitch circle diameter',
+                        formula: "d' = \\frac{d_b}{\\cos{\\alpha'}}",
+                        valueLeft: data.GearData?.OperatingPitchDiameter,
+                        valueRight: data.PinionData?.OperatingPitchDiameter,
+                        useColumnSpan: false,
+                    },
+                    {
+                        key: '2-4',
+                        name: 'Addendum circle diameter',
+                        formula: 'd_a = d + 2h_a',
+                        valueLeft: data.GearData?.AddendumDiameter,
+                        valueRight: data.PinionData?.AddendumDiameter,
+                        useColumnSpan: false,
+                    },
+                    {
+                        key: '2-5',
+                        name: 'Dedendum circle diameter',
+                        formula: 'd_f = d - 2h',
+                        valueLeft: data.GearData?.DedendumDiameter,
+                        valueRight: data.PinionData?.DedendumDiameter,
+                        useColumnSpan: false,
+                    },
+                ],
             },
             {
-                name: 'Profile shift coefficients',
-                formula: 'x',
-                value: data.GearData.ShiftCoefficient,
-                valueSecondary: data.PinionData.ShiftCoefficient,
-                areValuesShared: false,
+                key: '3',
+                name: 'Geometrical parameters',
+                children: [
+                    {
+                        key: '3-1',
+                        name: 'Profile shift coefficients',
+                        formula: 'x',
+                        valueLeft: data.GearData?.ShiftCoefficient,
+                        valueRight: data.PinionData?.ShiftCoefficient,
+                        useColumnSpan: false,
+                    },
+                    {
+                        key: '3-2',
+                        name: 'Center distance modification coefficient',
+                        formula:
+                            "y = \\frac{z_1+z_2}{2} \\left( \\frac{\\cos{\\alpha}}{\\cos{\\alpha'}}-1 \\right)",
+                        valueLeft:
+                            data.MechanismData?.CenterDistanceCoefficient,
+                        useColumnSpan: true,
+                    },
+                    {
+                        key: '3-3',
+                        name: 'Center distance',
+                        formula: 'a = \\left(\\frac{z_1+z_2}{2} + y \\right) m',
+                        valueLeft: data.MechanismData?.CenterDistance,
+                        useColumnSpan: true,
+                    },
+                    {
+                        key: '3-4',
+                        name: 'Pitch (arc length)',
+                        formula: 'p = \\pi m',
+                        valueLeft: data.MechanismData?.Pitch,
+                        useColumnSpan: true,
+                    },
+                    {
+                        key: '3-5',
+                        name: 'Fillet radius',
+                        formula: '\\rho = 0.38 m',
+                        valueLeft: data.MechanismData?.FilletRadius,
+                        useColumnSpan: true,
+                    },
+                ],
             },
             {
-                name: 'Pressure angle',
-                formula: '\\alpha',
-                value: data.MechanismData.PressureAngle,
-                areValuesShared: true,
-            },
-            {
-                name: 'Operating pressure angle',
-                formula:
-                    "\\alpha' = inverseInvolute \\left(2\\tan{\\alpha}\\frac{x_1+x_2}{z_1+z_2}+inv{\\alpha} \\right)",
-                value: data.MechanismData.OperatingPressureAngle,
-                areValuesShared: true,
-            },
-            {
-                name: 'Transmission ratio',
-                formula: 'i = \\frac{z_2}{z_1}',
-                value: data.MechanismData.TransmissionRatio,
-                areValuesShared: true,
-            },
-            {
-                name: 'Center distance modification coefficient',
-                formula:
-                    "y = \\frac{z_1+z_2}{2} \\left( \\frac{\\cos{\\alpha}}{\\cos{\\alpha'}}-1 \\right)",
-                value: data.MechanismData.CenterDistanceCoefficient,
-                areValuesShared: true,
-            },
-            {
-                name: 'Center distance',
-                formula: 'a = \\left(\\frac{z_1+z_2}{2} + y \\right) m',
-                value: data.MechanismData.CenterDistance,
-                areValuesShared: true,
-            },
-            {
-                name: 'Reference pitch circle diameter',
-                formula: 'd = zm',
-                value: data.GearData.ReferencePitchDiameter,
-                valueSecondary: data.PinionData.ReferencePitchDiameter,
-                areValuesShared: false,
-            },
-            {
-                name: 'Base circle diameter',
-                formula: 'd_b = d\\cos{\\alpha}',
-                value: data.GearData.BaseCircleDiameter,
-                valueSecondary: data.PinionData.BaseCircleDiameter,
-                areValuesShared: false,
-            },
-            {
-                name: 'Operating pitch circle diameter',
-                formula: "d' = \\frac{d_b}{\\cos{\\alpha'}}",
-                value: data.GearData.OperatingPitchDiameter,
-                valueSecondary: data.PinionData.OperatingPitchDiameter,
-                areValuesShared: false,
-            },
-            {
-                name: 'Addendum circle diameter',
-                formula: 'd_a = d + 2h_a',
-                value: data.GearData.AddendumDiameter,
-                valueSecondary: data.PinionData.AddendumDiameter,
-                areValuesShared: false,
-            },
-            {
-                name: 'Dedendum circle diameter',
-                formula: 'd_f = d - 2h',
-                value: data.GearData.DedendumDiameter,
-                valueSecondary: data.PinionData.DedendumDiameter,
-                areValuesShared: false,
-            },
-            {
-                name: 'Pitch',
-                formula: 'p = \\pi m',
-                value: data.MechanismData.Pitch,
-                areValuesShared: true,
-            },
-            {
-                name: 'Fillet radius',
-                formula: '\\rho = 0.38 m',
-                value: data.MechanismData.FilletRadius,
-                areValuesShared: true,
-            },
-            {
-                name: 'Tooth thickness at the reference pitch circle',
-                formula:
-                    "s = m \\left(\\frac{1}{2} \\pi + 2x + \\tan{\\alpha'} \\right)",
-                value: data.GearData.ThicknessReference,
-                valueSecondary: data.PinionData.ThicknessReference,
-                areValuesShared: false,
-            },
-            {
-                name: 'Tooth thickness at the operating pitch circle',
-                formula:
-                    "s_w = d' \\left(\\frac{s}{d} + inv(\\alpha) - inv(\\alpha') \\right)",
-                value: data.GearData.ThicknessOperating,
-                valueSecondary: data.PinionData.ThicknessOperating,
-                areValuesShared: false,
-            },
-            {
-                name: 'Tooth thickness at the base circle',
-                formula:
-                    "s = d_b \\left(\\frac{s_w}{d_w} + inv(\\alpha') \\right)",
-                value: data.GearData.ThicknessBase,
-                valueSecondary: data.PinionData.ThicknessBase,
-                areValuesShared: false,
-            },
-            {
-                name: 'Tooth thickness at the addendum pitch circle',
-                formula:
-                    's = d_a \\left(\\frac{s_b}{d_b} + inv(\\alpha_a) \\right)',
-                value: data.GearData.ThicknessTip,
-                valueSecondary: data.PinionData.ThicknessTip,
-                areValuesShared: false,
-            },
-            {
-                name: 'Angle of tooth tip',
-                formula:
-                    '\\alpha_a = \\arccos{\\left(\\frac{d}{d_a} \\cos{\\alpha} \\right)}',
-                value: data.GearData.AngleTip,
-                valueSecondary: data.PinionData.AngleTip,
-                areValuesShared: false,
-            },
-            {
-                name: 'Contact Ratio',
-                formula:
-                    '\\epsilon = \\frac{\\sqrt{(\\frac{d_{a1}}{2})^2 - (\\frac{d_{b1}}{2})^2} + \\sqrt{(\\frac{d_{a2}}{2})^2 - (\\frac{d_{b2}}{2})^2} + a \\sin{\\alpha}}{\\pi m \\cos{\\alpha}}',
-                value: data.MechanismData.ContactRatio,
-                areValuesShared: true,
+                key: '4',
+                name: 'Teeth geometry',
+                children: [
+                    {
+                        key: '4-1',
+                        name: 'Tooth thickness at the reference pitch circle',
+                        formula:
+                            "s = m \\left(\\frac{1}{2} \\pi + 2x + \\tan{\\alpha'} \\right)",
+                        valueLeft: data.GearData?.ThicknessReference,
+                        valueRight: data.PinionData?.ThicknessReference,
+                        useColumnSpan: false,
+                    },
+                    {
+                        key: '4-2',
+                        name: 'Tooth thickness at the operating pitch circle',
+                        formula:
+                            "s_w = d' \\left(\\frac{s}{d} + inv(\\alpha) - inv(\\alpha') \\right)",
+                        valueLeft: data.GearData?.ThicknessOperating,
+                        valueRight: data.PinionData?.ThicknessOperating,
+                        useColumnSpan: false,
+                    },
+                    {
+                        key: '4-3',
+                        name: 'Tooth thickness at the base circle',
+                        formula:
+                            "s = d_b \\left(\\frac{s_w}{d_w} + inv(\\alpha') \\right)",
+                        valueLeft: data.GearData?.ThicknessBase,
+                        valueRight: data.PinionData?.ThicknessBase,
+                        useColumnSpan: false,
+                    },
+                    {
+                        key: '4-4',
+                        name: 'Tooth thickness at the addendum pitch circle',
+                        formula:
+                            's = d_a \\left(\\frac{s_b}{d_b} + inv(\\alpha_a) \\right)',
+                        valueLeft: data.GearData?.ThicknessTip,
+                        valueRight: data.PinionData?.ThicknessTip,
+                        useColumnSpan: false,
+                    },
+                    {
+                        key: '4-5',
+                        name: 'Angle of tooth tip',
+                        formula:
+                            '\\alpha_a = \\arccos{\\left(\\frac{d}{d_a} \\cos{\\alpha} \\right)}',
+                        valueLeft: data.GearData?.AngleTip,
+                        valueRight: data.PinionData?.AngleTip,
+                        useColumnSpan: false,
+                    },
+                ],
             },
         ];
 

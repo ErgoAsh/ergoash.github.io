@@ -12,6 +12,7 @@ import { GearParametersService } from 'src/app/services/gear-parameters/gear-par
 import { CalculationsResultsData } from 'src/app/models/gear-parameters.model';
 
 import * as d3 from 'd3';
+import { GearTableComponent } from '../gear-table/gear-table.component';
 
 export interface GearMechanismInputData {
     m: number;
@@ -35,6 +36,9 @@ export enum PlayerState {
 export class GearPageComponent implements AfterViewInit, OnInit {
     @ViewChild('figure')
     figure!: ElementRef<HTMLDivElement>;
+
+    @ViewChild(GearTableComponent)
+    tableComponent!: GearTableComponent;
 
     dataForm!: FormGroup;
     dataModel: GearMechanismInputData = {
@@ -116,9 +120,9 @@ export class GearPageComponent implements AfterViewInit, OnInit {
         }
 
         const x =
-            this.figure.nativeElement.offsetWidth / (2 * scaleX) - centerX;
+            (0.5 * this.figure.nativeElement.offsetWidth) / scaleX - centerX;
         const y =
-            this.figure.nativeElement.offsetHeight / (2 * scaleY) - centerY;
+            (0.5 * this.figure.nativeElement.offsetHeight) / scaleY - centerY;
 
         const translate = 'translate(' + x + ', ' + y + ')';
         const scaleString = 'scale(' + scaleX + ', ' + scaleY + ')';
@@ -198,7 +202,7 @@ export class GearPageComponent implements AfterViewInit, OnInit {
                 this.visualService.startAnimation(
                     this.pinionPath,
                     this.gearPath,
-                    this.mechanismData?.MechanismData.TransmissionRatio,
+                    this.mechanismData?.MechanismData?.TransmissionRatio,
                     this.mechanismData?.PinionPosition,
                     this.mechanismData?.GearPosition,
                     this.pinionRotationAngle,
@@ -208,7 +212,7 @@ export class GearPageComponent implements AfterViewInit, OnInit {
                 this.visualService.startAnimation(
                     this.pinionPath,
                     this.gearPath,
-                    this.mechanismData?.MechanismData.TransmissionRatio,
+                    this.mechanismData?.MechanismData?.TransmissionRatio,
                     this.mechanismData?.PinionPosition,
                     this.mechanismData?.GearPosition
                 );

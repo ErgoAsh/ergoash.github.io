@@ -115,7 +115,7 @@ export class GearGeometryService {
                 attributes: [
                     { key: 'stroke', value: 'black' },
                     { key: 'stroke-width', value: '0.75' },
-                    { key: 'stroke-dasharray', value: '2 1' },
+                    { key: 'stroke-dasharray', value: '3 1' },
                 ],
             } as GearGeometry,
             {
@@ -160,7 +160,7 @@ export class GearGeometryService {
             list.push(
                 new Point(
                     baseRadius * (Math.cos(t) + t * Math.sin(t)),
-                    dir * baseRadius * (Math.sin(t) - t * Math.cos(t))
+                    baseRadius * (Math.sin(t) - t * Math.cos(t)) * dir
                 )
             );
         }
@@ -287,6 +287,16 @@ export class GearGeometryService {
         const pinion = data.PinionData;
         const gear = data.GearData;
 
+        if (
+            pinion === undefined ||
+            gear === undefined ||
+            data.MechanismData === undefined
+        ) {
+            throw new Error(
+                '[generateGearMechanismPath] Mechanism data is undefined'
+            );
+        }
+
         const GearElements: GearGeometry[] = [
             ...this.generateGearCirclesGeometry(
                 new Point(0, 0),
@@ -328,6 +338,8 @@ export class GearGeometryService {
             attributes: [
                 { key: 'stroke', value: 'orange' },
                 { key: 'stroke-width', value: '1' },
+                { key: 'stroke-linecap', value: 'round' },
+                { key: 'stroke-linejoin', value: 'round' },
             ],
             name: 'pinion',
         });
@@ -358,6 +370,8 @@ export class GearGeometryService {
             attributes: [
                 { key: 'stroke', value: 'red' },
                 { key: 'stroke-width', value: '1' },
+                { key: 'stroke-linecap', value: 'round' },
+                { key: 'stroke-linejoin', value: 'round' },
             ],
             name: 'gear',
         });

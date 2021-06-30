@@ -9,7 +9,9 @@
                 </nz-tab>
 
                 <nz-tab nzTitle="Parameter information table">
-                    lorem ipsum
+                    <app-gear-table
+                        [resultData]="mechanismData"
+                    ></app-gear-table>
                 </nz-tab>
             </nz-tabset>
         </div>
@@ -32,7 +34,7 @@
                         *ngIf="isPlaying()"
                         (click)="pauseAnimation()"
                     >
-                        <i nz-icon nzType="pause"></i>
+                        <i nz-icon nzType="pause" nzTheme="outline"></i>
                     </button>
 
                     <button
@@ -41,7 +43,7 @@
                         *ngIf="!isPlaying()"
                         (click)="startAnimation()"
                     >
-                        <i nz-icon nzType="caret-right"></i>
+                        <i nz-icon nzType="caret-right" nzTheme="outline"></i>
                     </button>
 
                     <button

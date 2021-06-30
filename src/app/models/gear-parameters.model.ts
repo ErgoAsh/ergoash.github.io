@@ -17,9 +17,9 @@ export interface GearGeometry {
 }
 
 export interface CalculationsResultsData {
-    PinionData: GearCharacteristicsData;
-    GearData: GearCharacteristicsData;
-    MechanismData: GearMechanismData;
+    PinionData?: GearCharacteristicsData;
+    GearData?: GearCharacteristicsData;
+    MechanismData?: GearMechanismData;
     MechanismGeometry?: GearGeometry[];
     PinionPosition: Point;
     GearPosition: Point;

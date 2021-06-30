@@ -72,7 +72,7 @@ export class GearParametersService {
         StartAngleOffset: number
     ): Map<number, CurveType> {
         let GearAngleData = new Map<number, CurveType>();
-        const InvoluteOffset = 0.0001; // TODO check
+        const InvoluteOffset = 0.000000000001; // TODO check
 
         for (let j = 0; j < Teeth; j++) {
             GearAngleData.set(

@@ -54,10 +54,7 @@ export class GearVisualizationService {
             }
         }
 
-        return result
-            .attr('fill', 'none')
-            .attr('stroke-linecap', 'round') // TODO remove for circles
-            .attr('stroke-linejoin', 'round');
+        return result.attr('fill', 'none');
     }
 
     startAnimation(

@@ -1,7 +1,9 @@
 export interface TableDataRow {
-    name?: string;
+    key: string;
+    name: string;
     formula?: string;
-    value: number;
-    valueSecondary?: number;
-    areValuesShared?: boolean;
+    valueLeft?: number;
+    valueRight?: number;
+    useColumnSpan?: boolean;
+    children?: TableDataRow[];
 }

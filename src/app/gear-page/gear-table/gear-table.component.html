@@ -1,6 +1,11 @@
-<p>AA</p>
-<!--
-<nz-table #expandTable [nzData]="resultData" nzTableLayout="fixed">
+<nz-table
+    #expandTable
+    [nzData]="tableData"
+    [nzFrontPagination]="false"
+    [nzShowPagination]="false"
+    [nzBordered]="true"
+    [nzScroll]="{ y: (tabContentHeight - 55).toString() + 'px' }"
+>
     <thead>
         <tr>
             <th>Name</th>
@@ -11,24 +16,31 @@
     </thead>
     <tbody>
         <ng-container *ngFor="let data of expandTable.data">
-            <ng-container *ngFor="let item of mapOfExpandedData[data.key]">
-                <tr *ngIf="(item.parent && item.parent.expand) || !item.parent">
+            <ng-container *ngFor="let item of tableMap[data.key]">
+                <tr
+                    *ngIf="
+                        (item.parent && item.parent.isExpanded) || !item.parent
+                    "
+                >
                     <td
                         [nzIndentSize]="item.level! * 20"
                         [nzShowExpand]="!!item.children"
-                        [(nzExpand)]="item.expand"
+                        [(nzExpand)]="item.isExpanded"
                         (nzExpandChange)="
-                            collapse(mapOfExpandedData[data.key], item, $event)
+                            collapse(tableMap[data.key], item, $event)
                         "
                     >
                         {{ item.name }}
                     </td>
-                    <td>{{ item.formula }}</td>
-                    <td [colSpan]='item.useColumnSpan ? 2 : 1'>{{ item.pinion }}</td>
-                    <td>{{ item.gear }}</td>
+                    <td>
+                        <ng-katex [equation]="item.formula!"></ng-katex>
+                    </td>
+                    <td [colSpan]="item.useColumnSpan ? 2 : 1">
+                        {{ item.valueLeft }}
+                    </td>
+                    <td>{{ item.valueRight }}</td>
                 </tr>
             </ng-container>
         </ng-container>
     </tbody>
 </nz-table>
--->

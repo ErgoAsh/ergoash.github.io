@@ -4,6 +4,11 @@ export interface TableDataRow {
     formula?: string;
     valueLeft?: number;
     valueRight?: number;
+
+    level: number;
+    isExpanded: boolean;
     useColumnSpan?: boolean;
+
     children?: TableDataRow[];
+    parent?: TableDataRow;
 }

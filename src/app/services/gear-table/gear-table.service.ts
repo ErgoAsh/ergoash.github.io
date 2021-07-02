@@ -174,7 +174,7 @@ export class GearTableService {
                         valueLeft: data.GearData?.ShiftCoefficient,
                         valueRight: data.PinionData?.ShiftCoefficient,
                         unit: '-',
-                        roundDigit: 3,
+                        roundDigit: 4,
                         useColumnSpan: false,
                         isExpanded: false,
                         level: 1,

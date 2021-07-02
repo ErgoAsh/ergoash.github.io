@@ -38,18 +38,6 @@ export class GearTableComponent implements OnInit, AfterViewInit, OnChanges {
         if (scr !== null) {
             scr.style.height = (this.tabContentHeight - 55).toString() + 'px';
         }
-
-        this.firstColumn.changes.subscribe((observer) => {
-            const list = observer as QueryList<HTMLTableColElement>;
-            list.forEach((col) => {
-                if (
-                    col.attributes.getNamedItem('ng-reflect-nz-indent-size')
-                        ?.value === '0'
-                ) {
-                    col.style.columnSpan = '4';
-                }
-            });
-        });
     }
 
     ngOnChanges(): void {

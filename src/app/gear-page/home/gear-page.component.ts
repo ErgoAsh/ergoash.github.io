@@ -1,3 +1,11 @@
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { GearVisualizationService } from 'src/app/services/gear-visualization/gear-visualization.service';
+import { GearGeometryService } from 'src/app/services/gear-geometry/gear-geometry.service';
+import { GearParametersService } from 'src/app/services/gear-parameters/gear-parameters.service';
+import { CalculationsResultsData } from 'src/app/models/gear-parameters.model';
+import { GearTableComponent } from '../gear-table/gear-table.component';
+import { PlayerState } from 'src/app/models/gear-player-state.model';
+
 import {
     AfterViewInit,
     Component,
@@ -5,14 +13,8 @@ import {
     OnInit,
     ViewChild,
 } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { GearVisualizationService } from 'src/app/services/gear-visualization/gear-visualization.service';
-import { GearGeometryService } from 'src/app/services/gear-geometry/gear-geometry.service';
-import { GearParametersService } from 'src/app/services/gear-parameters/gear-parameters.service';
-import { CalculationsResultsData } from 'src/app/models/gear-parameters.model';
 
 import * as d3 from 'd3';
-import { GearTableComponent } from '../gear-table/gear-table.component';
 
 export interface GearMechanismInputData {
     m: number;
@@ -20,12 +22,6 @@ export interface GearMechanismInputData {
     z2: number;
     x1: number;
     x2: number;
-}
-
-export enum PlayerState {
-    PAUSED,
-    PLAYING,
-    STOPPED,
 }
 
 @Component({
@@ -52,7 +48,6 @@ export class GearPageComponent implements AfterViewInit, OnInit {
     sliderScale = 7;
     mechanismData?: CalculationsResultsData;
 
-    playerState = PlayerState.STOPPED;
     gearPath?: d3.Selection<SVGPathElement, unknown, HTMLElement, any>;
     pinionPath?: d3.Selection<SVGPathElement, unknown, HTMLElement, any>;
 
@@ -95,6 +90,46 @@ export class GearPageComponent implements AfterViewInit, OnInit {
         this.visualService.defaultFigure = d3.select('#svg').append('g');
     }
 
+    submitForm(): void {
+        d3.select('g').remove();
+
+        this.dataModel = this.dataForm.value;
+        this.mechanismData = this.parametersService.calculateCouplingParameters(
+            this.dataModel.m,
+            this.dataModel.z1,
+            this.dataModel.z2,
+            this.dataModel.x1,
+            this.dataModel.x2
+        );
+
+        this.addPathGroup(
+            this.mechanismData.ActionPosition.x,
+            this.mechanismData.ActionPosition.y
+        );
+
+        const result = this.geometryService.generateGearMechanismPath(
+            this.mechanismData
+        );
+        this.hasDataBeenCalculated = true;
+
+        for (const item of result.MechanismGeometry || []) {
+            const pathElement = this.visualService.showElement(
+                item.path,
+                undefined,
+                item.attributes
+            );
+
+            switch (item?.name) {
+                case 'pinion':
+                    this.pinionPath = pathElement;
+                    break;
+                case 'gear':
+                    this.gearPath = pathElement;
+                    break;
+            }
+        }
+    }
+
     onSliderChange(value: number): void {
         this.updateGroupTransform(
             value,
@@ -102,6 +137,7 @@ export class GearPageComponent implements AfterViewInit, OnInit {
             this.mechanismData?.ActionPosition.x,
             this.mechanismData?.ActionPosition.y
         );
+        this.sliderScale = value;
     }
 
     updateGroupTransform(
@@ -144,61 +180,9 @@ export class GearPageComponent implements AfterViewInit, OnInit {
         );
     }
 
-    submitForm(): void {
-        d3.select('g').remove();
-
-        this.dataModel = this.dataForm.value;
-        this.mechanismData = this.parametersService.calculateCouplingParameters(
-            this.dataModel.m,
-            this.dataModel.z1,
-            this.dataModel.z2,
-            this.dataModel.x1,
-            this.dataModel.x2
-        );
-
-        this.addPathGroup(
-            this.mechanismData.ActionPosition.x,
-            this.mechanismData.ActionPosition.y
-        );
-
-        const result = this.geometryService.generateGearMechanismPath(
-            this.mechanismData
-        );
-        this.hasDataBeenCalculated = true;
-
-        for (const item of result.MechanismGeometry || []) {
-            const pathElement = this.visualService.showElement(
-                item.path,
-                undefined,
-                item.attributes
-            );
-
-            switch (item?.name) {
-                case 'pinion':
-                    this.pinionPath = pathElement;
-                    break;
-                case 'gear':
-                    this.gearPath = pathElement;
-                    break;
-            }
-        }
-    }
-
-    isPlaying(): boolean {
-        return this.playerState === PlayerState.PLAYING;
-    }
-
-    hasPaused(): boolean {
-        return this.playerState === PlayerState.PAUSED;
-    }
-
-    hasStopped(): boolean {
-        return this.playerState === PlayerState.STOPPED;
-    }
-
-    startAnimation(): void {
+    startAnimation(previousState: PlayerState): void {
         if (this.pinionPath && this.gearPath) {
-            if (this.hasPaused()) {
+            if (previousState === PlayerState.PAUSED) {
                 this.visualService.startAnimation(
                     this.pinionPath,
                     this.gearPath,
@@ -208,7 +192,7 @@ export class GearPageComponent implements AfterViewInit, OnInit {
                     this.pinionRotationAngle,
                     this.gearRotationAngle
                 );
-            } else if (this.hasStopped()) {
+            } else if (previousState === PlayerState.STOPPED) {
                 this.visualService.startAnimation(
                     this.pinionPath,
                     this.gearPath,
@@ -217,7 +201,6 @@ export class GearPageComponent implements AfterViewInit, OnInit {
                     this.mechanismData?.GearPosition
                 );
             }
-            this.playerState = PlayerState.PLAYING;
         }
     }
 
@@ -227,8 +210,6 @@ export class GearPageComponent implements AfterViewInit, OnInit {
             this.gearRotationAngle = 0;
             this.pinionRotationAngle = 0;
         }
-
-        this.playerState = PlayerState.STOPPED;
     }
 
     pauseAnimation(): void {
@@ -241,7 +222,5 @@ export class GearPageComponent implements AfterViewInit, OnInit {
             this.pinionRotationAngle = result?.pinionAnimationAngle || 0;
             this.gearRotationAngle = result?.gearAnimationAngle || 0;
         }
-
-        this.playerState = PlayerState.PAUSED;
     }
 }

@@ -1,0 +1,34 @@
+<div class="gear-player">
+    <nz-slider
+        nzMin="1"
+        nzMax="15"
+        nzStep="0.1"
+        [(ngModel)]="sliderValue"
+        (ngModelChange)="onSliderChange($event)"
+    >
+    </nz-slider>
+
+    <div>
+        <button
+            nz-button
+            nzType="primary"
+            *ngIf="isPlaying()"
+            (click)="pause()"
+        >
+            <i nz-icon nzType="pause" nzTheme="outline"></i>
+        </button>
+
+        <button
+            nz-button
+            nzType="primary"
+            *ngIf="!isPlaying()"
+            (click)="start()"
+        >
+            <i nz-icon nzType="caret-right" nzTheme="outline"></i>
+        </button>
+
+        <button nz-button nzType="primary" (click)="stop()">
+            <i>&#x25a0;</i>
+        </button>
+    </div>
+</div>

@@ -6,6 +6,7 @@ import { SharedModule } from '../shared-module/shared.module';
 import { GearPageRoutingModule } from './gear-page-routing.module';
 import { GearPageComponent } from './home/gear-page.component';
 import { GearTableComponent } from './gear-table/gear-table.component';
+import { GearPlayerComponent } from './gear-player/gear-player.component';
 
 import { ZorroAntdModule } from '../app-zorro.module';
 import { KatexModule } from 'ng-katex';
@@ -19,7 +20,7 @@ import {
 const icons: IconDefinition[] = [CaretRightOutline, PauseCircleOutline];
 
 @NgModule({
-    declarations: [GearPageComponent, GearTableComponent],
+    declarations: [GearPageComponent, GearTableComponent, GearPlayerComponent],
     imports: [
         CommonModule,
         SharedModule,

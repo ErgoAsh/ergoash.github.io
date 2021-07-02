@@ -1,0 +1,19 @@
+.gear-player {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    width: 250px;
+    padding: 10px;
+    border: 1px solid #f0f0f0;
+
+    background-color: white;
+
+    button {
+        margin-right: 10px;
+    }
+
+    nz-slider {
+        width: 100%;
+    }
+}

@@ -4,5 +4,14 @@
     "semi": true,
     "bracketSpacing": true,
     "tabWidth": 4,
-    "useTabs": false
+    "useTabs": false,
+
+    "overrides": [
+        {
+            "files": "src/**/*.html", 
+            "options": {
+                "printWidth": 100
+            }
+        }
+    ]
 }

@@ -4,6 +4,8 @@ export interface TableDataRow {
     formula?: string;
     valueLeft?: number;
     valueRight?: number;
+    unit?: string;
+    roundDigit?: number;
 
     level: number;
     isExpanded: boolean;

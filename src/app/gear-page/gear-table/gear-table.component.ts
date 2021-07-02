@@ -86,9 +86,16 @@ export class GearTableComponent implements OnInit, AfterViewInit, OnChanges {
         }
     }
 
-    round(num?: number): number | undefined {
-        if (num === undefined) return undefined;
+    round(num?: number, roundDigit?: number): number | undefined {
+        if (num === undefined || roundDigit === undefined) return undefined;
 
-        return Math.round((num + Number.EPSILON) * 1000) / 1000;
+        if (roundDigit <= 0) {
+            return num;
+        }
+
+        return (
+            Math.round((num + Number.EPSILON) * Math.pow(10, roundDigit)) /
+            Math.pow(10, roundDigit)
+        );
     }
 }

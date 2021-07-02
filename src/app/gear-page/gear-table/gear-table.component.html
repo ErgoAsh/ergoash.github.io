@@ -1,58 +1,54 @@
 <nz-table
-    #expandTable    
+    #expandTable
     nzTableLayout="fixed"
     nzSize="small"
     nzFrontPagination="false"
     nzShowPagination="false"
     [nzData]="tableData"
     [nzBordered]="true"
-    [nzScroll]="{ y: (tabContentHeight - 55).toString() + 'px'}"
+    [nzScroll]="{ y: (tabContentHeight - 40).toString() + 'px' }"
 >
     <thead>
         <tr>
             <th nzAlign="center">Name</th>
             <th nzAlign="center">Symbol and formula</th>
+            <th nzAlign="center" nzWidth="100px">Gear</th>
             <th nzAlign="center" nzWidth="100px">Pinion</th>
-            <th nzAlign="center" nzWidth="100px">Gear</th> 
+            <th nzAlign="center" nzWidth="50px">Unit</th>
         </tr>
     </thead>
     <tbody>
         <ng-container *ngFor="let data of expandTable.data">
             <ng-container *ngFor="let item of tableMap[data.key]">
                 <tr
-                    (click)="
-                        toggleExpand(tableMap[data.key], item, item.isExpanded)
-                    "
-                    *ngIf="
-                        (item.parent && item.parent.isExpanded) || !item.parent
-                    "
+                    (click)="toggleExpand(tableMap[data.key], item, item.isExpanded)"
+                    *ngIf="(item.parent && item.parent.isExpanded) || !item.parent"
                 >
-                    <td #firstColumn
+                    <td
+                        #firstColumn
+                        [colSpan]="item.level === 0 ? 5 : 1"
                         [nzIndentSize]="item.level! * 15"
                         [nzShowExpand]="!!item.children"
                         [(nzExpand)]="item.isExpanded"
-                        (nzExpandChange)="
-                            toggleExpand(
-                                tableMap[data.key],
-                                item,
-                                item.isExpanded
-                            )
-                        "
+                        (nzExpandChange)="toggleExpand(tableMap[data.key], item, item.isExpanded)"
                     >
                         {{ item.name }}
-                    </td>
-                    <td>
+                    </td> 
+                    <td *ngIf="item.formula">
                         <ng-katex
                             [equation]="item.formula!"
                             [options]="{ displayMode: true }"
                         ></ng-katex>
                     </td>
-                    <td nzAlign="center"
+                    <td
+                        *ngIf="item.valueLeft"
+                        nzAlign="center"
                         [colSpan]="item.useColumnSpan ? 2 : 1"
-                        >
-                        {{ round(item.valueLeft) }}
+                    >
+                        {{ round(item.valueLeft, item.roundDigit) }}
                     </td>
-                    <td nzAlign="center">{{ round(item.valueRight) }}</td>
+                    <td *ngIf="item.valueRight" nzAlign="center">{{ round(item.valueRight, item.roundDigit) }}</td>
+                    <td *ngIf="item.unit" nzAlign="center">{{ item.unit }}</td>
                 </tr>
             </ng-container>
         </ng-container>

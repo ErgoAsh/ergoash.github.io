@@ -73,7 +73,7 @@ export class GearTableService {
                         key: '1-6',
                         name: 'Contact ratio',
                         formula:
-                            '\\epsilon = \\frac{\\sqrt{(\\frac{d_{a1}}{2})^2 - (\\frac{d_{b1}}{2})^2} + \\sqrt{(\\frac{d_{a2}}{2})^2 - (\\frac{d_{b2}}{2})^2} + a \\sin{\\alpha}}{\\pi m \\cos{\\alpha}}',
+                            '\\varepsilon = \\frac{\\sqrt{(\\frac{d_{a1}}{2})^2 - (\\frac{d_{b1}}{2})^2} + \\sqrt{(\\frac{d_{a2}}{2})^2 - (\\frac{d_{b2}}{2})^2} + a \\sin{\\alpha}}{\\pi m \\cos{\\alpha}}',
                         valueLeft: data.MechanismData?.ContactRatio,
                         useColumnSpan: true,
                         isExpanded: false,

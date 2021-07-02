@@ -1,44 +1,58 @@
 <nz-table
-    #expandTable
+    #expandTable    
+    nzTableLayout="fixed"
+    nzSize="small"
+    nzFrontPagination="false"
+    nzShowPagination="false"
     [nzData]="tableData"
-    [nzFrontPagination]="false"
-    [nzShowPagination]="false"
     [nzBordered]="true"
-    [nzScroll]="{ y: (tabContentHeight - 55).toString() + 'px' }"
+    [nzScroll]="{ y: (tabContentHeight - 55).toString() + 'px'}"
 >
     <thead>
         <tr>
-            <th>Name</th>
-            <th>Symbol and formula</th>
-            <th>Pinion</th>
-            <th>Gear</th>
+            <th nzAlign="center">Name</th>
+            <th nzAlign="center">Symbol and formula</th>
+            <th nzAlign="center" nzWidth="100px">Pinion</th>
+            <th nzAlign="center" nzWidth="100px">Gear</th> 
         </tr>
     </thead>
     <tbody>
         <ng-container *ngFor="let data of expandTable.data">
             <ng-container *ngFor="let item of tableMap[data.key]">
                 <tr
+                    (click)="
+                        toggleExpand(tableMap[data.key], item, item.isExpanded)
+                    "
                     *ngIf="
                         (item.parent && item.parent.isExpanded) || !item.parent
                     "
                 >
-                    <td
-                        [nzIndentSize]="item.level! * 20"
+                    <td #firstColumn
+                        [nzIndentSize]="item.level! * 15"
                         [nzShowExpand]="!!item.children"
                         [(nzExpand)]="item.isExpanded"
                         (nzExpandChange)="
-                            collapse(tableMap[data.key], item, $event)
+                            toggleExpand(
+                                tableMap[data.key],
+                                item,
+                                item.isExpanded
+                            )
                         "
                     >
                         {{ item.name }}
                     </td>
                     <td>
-                        <ng-katex [equation]="item.formula!"></ng-katex>
+                        <ng-katex
+                            [equation]="item.formula!"
+                            [options]="{ displayMode: true }"
+                        ></ng-katex>
                     </td>
-                    <td [colSpan]="item.useColumnSpan ? 2 : 1">
-                        {{ item.valueLeft }}
+                    <td nzAlign="center"
+                        [colSpan]="item.useColumnSpan ? 2 : 1"
+                        >
+                        {{ round(item.valueLeft) }}
                     </td>
-                    <td>{{ item.valueRight }}</td>
+                    <td nzAlign="center">{{ round(item.valueRight) }}</td>
                 </tr>
             </ng-container>
         </ng-container>

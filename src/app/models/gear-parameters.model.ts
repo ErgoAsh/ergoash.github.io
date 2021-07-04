@@ -29,16 +29,24 @@ export interface CalculationsResultsData {
 export interface GearCharacteristicsData {
     NumberOfTeeth: number;
     ShiftCoefficient: number;
-    ReferencePitchDiameter: number;
-    OperatingPitchDiameter: number;
-    DedendumDiameter: number;
-    AddendumDiameter: number;
-    BaseCircleDiameter: number;
-    ThicknessReference: number;
-    ThicknessOperating: number;
-    ThicknessBase: number;
+    TeethSpacing: number;
+    DiameterAddendum: number;
+    DiameterWorking: number;
+    DiameterReference: number;
+    DiameterBase: number;
+    DiameterDedendum: number;
     ThicknessTip: number;
-    AngleTip: number;
+    ThicknessWorking: number;
+    ThicknessReference: number;
+    ThicknessBase: number;
+    PressureAngleTip: number;
+    PressureAngleWorking: number;
+    PressureAngleReference: number;
+    PressureAngleBase: number;
+    WidthAngleTip: number;
+    WidthAngleWorking: number;
+    WidthAngleReference: number;
+    WidthAngleBase: number;
 }
 
 export interface GearMechanismData {
@@ -49,6 +57,7 @@ export interface GearMechanismData {
     CenterDistanceCoefficient: number;
     TransmissionRatio: number;
     ContactRatio: number;
-    Pitch: number;
+    MinimumTeethAmount: number;
+    CircularPitch: number;
     FilletRadius: number;
 }

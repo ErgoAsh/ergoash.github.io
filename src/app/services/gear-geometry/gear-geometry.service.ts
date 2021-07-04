@@ -115,7 +115,7 @@ export class GearGeometryService {
                 attributes: [
                     { key: 'stroke', value: 'black' },
                     { key: 'stroke-width', value: '0.75' },
-                    { key: 'stroke-dasharray', value: '3 1' },
+                    { key: 'stroke-dasharray', value: '3 1 1 1' },
                 ],
             } as GearGeometry,
             {
@@ -300,38 +300,40 @@ export class GearGeometryService {
         const GearElements: GearGeometry[] = [
             ...this.generateGearCirclesGeometry(
                 new Point(0, 0),
-                pinion.DedendumDiameter,
-                pinion.BaseCircleDiameter,
-                pinion.ReferencePitchDiameter,
-                pinion.OperatingPitchDiameter,
-                pinion.AddendumDiameter
+                pinion.DiameterDedendum,
+                pinion.DiameterBase,
+                pinion.DiameterReference,
+                pinion.DiameterWorking,
+                pinion.DiameterAddendum
             ),
             ...this.generateGearCirclesGeometry(
                 new Point(data.MechanismData.CenterDistance, 0),
-                gear.DedendumDiameter,
-                gear.BaseCircleDiameter,
-                gear.ReferencePitchDiameter,
-                gear.OperatingPitchDiameter,
-                gear.AddendumDiameter
+                gear.DiameterDedendum,
+                gear.DiameterBase,
+                gear.DiameterReference,
+                gear.DiameterWorking,
+                gear.DiameterAddendum
             ),
         ];
 
+        const offsetPinion = -this.mathService.involute(
+            pinion.PressureAngleWorking
+        );
+
         const pinionAngles = this.gearParametersService.generateAngleData(
             pinion.NumberOfTeeth,
-            this.mathService.involute(pinion.AngleTip),
-            (2 * Math.PI) / pinion.NumberOfTeeth,
-            (2 * pinion.ThicknessTip) / pinion.AddendumDiameter,
-            this.mathService.involute(
-                this.mathService.radians(
-                    data.MechanismData.OperatingPressureAngle
-                )
-            )
+            this.mathService.involute(pinion.PressureAngleTip),
+            pinion.TeethSpacing,
+            pinion.WidthAngleTip,
+            offsetPinion,
+            5, // TODO add to form
+            pinion.DiameterBase < pinion.DiameterDedendum
         );
         GearElements.push({
             path: this.generateGearProfile(
-                pinion.BaseCircleDiameter / 2,
-                pinion.DedendumDiameter / 2,
-                pinion.AddendumDiameter / 2,
+                pinion.DiameterBase / 2,
+                pinion.DiameterDedendum / 2,
+                pinion.DiameterAddendum / 2,
                 pinionAngles,
                 new Point(0, 0)
             ),
@@ -344,26 +346,24 @@ export class GearGeometryService {
             name: 'pinion',
         });
 
-        const Offset =
+        const offsetGear =
             (1 / 2) * Math.PI -
-            (2 * gear.ThicknessBase) / gear.BaseCircleDiameter +
-            this.mathService.involute(
-                this.mathService.radians(
-                    data.MechanismData.OperatingPressureAngle
-                )
-            );
+            this.mathService.involute(gear.PressureAngleWorking);
+
         const gearAngles = this.gearParametersService.generateAngleData(
             gear.NumberOfTeeth,
-            this.mathService.involute(gear.AngleTip),
-            (2 * Math.PI) / gear.NumberOfTeeth,
-            (2 * gear.ThicknessTip) / gear.AddendumDiameter,
-            Offset
+            this.mathService.involute(gear.PressureAngleTip),
+            gear.TeethSpacing,
+            gear.WidthAngleTip,
+            offsetGear,
+            5, // TODO add to form
+            gear.DiameterBase < gear.DiameterDedendum
         );
         GearElements.push({
             path: this.generateGearProfile(
-                gear.BaseCircleDiameter / 2,
-                gear.DedendumDiameter / 2,
-                gear.AddendumDiameter / 2,
+                gear.DiameterBase / 2,
+                gear.DiameterDedendum / 2,
+                gear.DiameterAddendum / 2,
                 gearAngles,
                 new Point(data.MechanismData.CenterDistance, 0)
             ),

@@ -65,68 +65,65 @@ export class GearParametersService {
     }
 
     public generateAngleData(
-        Teeth: number,
-        InvoluteAngle: number,
-        ToothSpacingAngle: number,
-        TipAngle: number,
-        StartAngleOffset: number
+        teethNumber: number,
+        involuteAngle: number,
+        toothSpacingAngle: number,
+        tipAngle: number,
+        startOffsetAngle: number,
+        arcPointNumber: number,
+        isBaseBelowDedendum: boolean
     ): Map<number, CurveType> {
         let GearAngleData = new Map<number, CurveType>();
-        const InvoluteOffset = 0.000000000001; // TODO check
 
-        for (let j = 0; j < Teeth; j++) {
-            GearAngleData.set(
-                StartAngleOffset + j * ToothSpacingAngle + InvoluteOffset,
-                CurveType.RisingInvolute
-            );
+        for (let j = 0; j < teethNumber; j++) {
+            const spacing = startOffsetAngle + j * toothSpacingAngle;
 
+            GearAngleData.set(spacing, CurveType.RisingInvolute);
             GearAngleData.set(
-                InvoluteAngle +
-                    StartAngleOffset +
-                    j * ToothSpacingAngle -
-                    InvoluteOffset,
+                spacing + involuteAngle,
                 CurveType.RisingInvolute
             );
         }
 
         const Tip = this.mathService.linspace(
-            5,
-            StartAngleOffset + InvoluteAngle,
-            StartAngleOffset + InvoluteAngle + TipAngle
+            arcPointNumber,
+            startOffsetAngle + involuteAngle,
+            startOffsetAngle + involuteAngle + tipAngle
         );
-        for (let j = 0; j < Teeth; j++) {
-            for (const Item of Tip.map((n) => n + j * ToothSpacingAngle)) {
+        for (let j = 0; j < teethNumber; j++) {
+            for (const Item of Tip.slice(1, arcPointNumber - 1).map(
+                (n) => n + j * toothSpacingAngle
+            )) {
                 GearAngleData.set(Item, CurveType.Addendum);
             }
         }
 
-        for (let j = 0; j < Teeth; j++) {
+        for (let j = 0; j < teethNumber; j++) {
+            const spacing = startOffsetAngle + j * toothSpacingAngle;
             GearAngleData.set(
-                StartAngleOffset +
-                    InvoluteAngle +
-                    TipAngle +
-                    j * ToothSpacingAngle +
-                    InvoluteOffset,
+                spacing + involuteAngle + tipAngle,
                 CurveType.ReturningInvolute
             );
 
             GearAngleData.set(
-                StartAngleOffset +
-                    2 * InvoluteAngle +
-                    TipAngle +
-                    j * ToothSpacingAngle -
-                    InvoluteOffset,
+                spacing + 2 * involuteAngle + tipAngle,
                 CurveType.ReturningInvolute
             );
         }
 
         const Dwell = this.mathService.linspace(
-            5,
-            StartAngleOffset + 2 * InvoluteAngle + TipAngle,
-            StartAngleOffset + ToothSpacingAngle
+            arcPointNumber,
+            startOffsetAngle + 2 * involuteAngle + tipAngle,
+            startOffsetAngle + toothSpacingAngle
         );
-        for (let j = 0; j < Teeth; j++) {
-            for (const Item of Dwell.map((n) => n + j * ToothSpacingAngle)) {
+        for (let j = 0; j < teethNumber; j++) {
+            const dwellCorrected = isBaseBelowDedendum
+                ? Dwell.slice(1, arcPointNumber - 1)
+                : Dwell.slice(1, arcPointNumber - 1); // TODO fix this line
+
+            for (const Item of dwellCorrected.map(
+                (n) => n + j * toothSpacingAngle
+            )) {
                 GearAngleData.set(Item, CurveType.Dedendum);
             }
         }
@@ -136,14 +133,37 @@ export class GearParametersService {
         return GearAngleData;
     }
 
+    public pressureAngle(givenDiameter: number, baseDiameter: number): number {
+        return Math.acos(baseDiameter / givenDiameter);
+    }
+
+    public teethWidth(
+        givenDiameter: number,
+        givenPressureInv: number,
+        pitchDiameter: number,
+        pitchTeethWidth: number,
+        pressureInv: number
+    ): number {
+        return (
+            givenDiameter *
+            (pitchTeethWidth / pitchDiameter + pressureInv - givenPressureInv)
+        );
+    }
+
+    public teethAngle(diameter: number, teethWidth: number): number {
+        return 2 * (teethWidth / diameter);
+    }
+
     public calculateCouplingParameters(
         m: number,
         z1: number,
         z2: number,
         x1: number,
-        x2: number
+        x2: number,
+        cStar: number = 0.25
     ): CalculationsResultsData {
         const alpha = this.mathService.radians(20);
+        const alphaInv = this.mathService.involute(alpha);
 
         const i = z2 / z1;
 
@@ -155,6 +175,8 @@ export class GearParametersService {
         const y =
             ((z1 + z2) / 2) * (Math.cos(alpha) / Math.cos(alphaPrime) - 1);
         const a = ((z1 + z2) / 2 + y) * m;
+
+        const zg = (2 * y) / Math.pow(Math.sin(alpha), 2);
 
         // Pitch circle
         const d1 = z1 * m;
@@ -168,21 +190,22 @@ export class GearParametersService {
         const d1Prime = dB1 / Math.cos(alphaPrime);
         const d2Prime = dB2 / Math.cos(alphaPrime);
 
-        // Addendum
-        const hA1 = (1 + y - x1) * m;
-        const hA2 = (1 + y - x2) * m;
-        // double h_a1 = (1 + x1) * m;
-        // double h_a2 = (1 + x2) * m;
+        // Teeth height (using KHK formulae)
+        const hA1 = (1 + y - x2) * m;
+        const hA2 = (1 + y - x1) * m;
 
-        // Addendum circle
-        const dA1 = d1 + 2 * hA1;
-        const dA2 = d2 + 2 * hA2;
+        const hF1 = (1 - x1 + cStar) * m;
+        const hF2 = (1 - x2 + cStar) * m;
 
-        // Dedendum circle
-        const h = (2.25 + y - (x1 + x2)) * m;
-        // double h = 2.25 * m;
-        const dF1 = dA1 - 2 * h;
-        const dF2 = dA2 - 2 * h;
+        const h1 = hA1 + hF1;
+        const h2 = hA2 + hF2;
+
+        // Addendum and dedendum diameters
+        const dA1 = m * z1 + 2 * hA1;
+        const dA2 = m * z2 + 2 * hA2;
+
+        const dF1 = m * z1 - 2 * hF1;
+        const dF2 = m * z2 - 2 * hF2;
 
         // Overlap coefficient
         const epsilon =
@@ -191,52 +214,88 @@ export class GearParametersService {
                 a * Math.sin(alphaPrime)) /
             (Math.PI * m * Math.cos(alpha));
 
-        // Pitch //TODO add to parameter list
-        const p1 = (Math.PI * d1) / z1;
-        const p2 = (Math.PI * d2) / z2;
+        // Circular pitch
         const p = Math.PI * m;
-        // double spacing_1 = p / (d1 / 2);
+        const spacing1 = (2 * Math.PI) / z1;
+        const spacing2 = (2 * Math.PI) / z2;
 
-        // Arc length of tooth at the reference pitch circle
+        // Pressure angle at every circle (except for dedendum circle)
+        const alphaW1 = this.pressureAngle(d1Prime, dB1);
+        const alphaW2 = this.pressureAngle(d2Prime, dB2);
+
+        const alphaB1 = this.pressureAngle(dB1, dB1);
+        const alphaB2 = this.pressureAngle(dB2, dB2);
+
+        const alphaA1 = this.pressureAngle(dA1, dB1);
+        const alphaA2 = this.pressureAngle(dA2, dB2);
+
+        const alphaP1 = this.pressureAngle(d1, dB1);
+        const alphaP2 = this.pressureAngle(d2, dB2);
+
+        // Arc length of teeth at every circle (except for dedendum circle)
         const sP1 = m * (Math.PI / 2 + 2 * x1 * Math.tan(alpha));
         const sP2 = m * (Math.PI / 2 + 2 * x2 * Math.tan(alpha));
 
-        // Arc length of tooth at the working pitch circle
-        const sW1 =
-            d1Prime *
-            (sP1 / d1 -
-                this.mathService.involute(alphaPrime) +
-                this.mathService.involute(alpha));
-        const sW2 =
-            d2Prime *
-            (sP2 / d2 -
-                this.mathService.involute(alphaPrime) +
-                this.mathService.involute(alpha));
+        const sW1 = this.teethWidth(
+            d1Prime,
+            this.mathService.involute(alphaW1),
+            d1,
+            sP1,
+            alphaInv
+        );
 
-        // Arc length of tooth at the base pitch circle
-        const sB1 =
-            dB1 * (sW1 / d1Prime + this.mathService.involute(alphaPrime));
-        const sB2 =
-            dB2 * (sW2 / d2Prime + this.mathService.involute(alphaPrime));
+        const sW2 = this.teethWidth(
+            d2Prime,
+            this.mathService.involute(alphaW2),
+            d2,
+            sP2,
+            alphaInv
+        );
 
-        // InverseInvolute angle of whole involute curve
-        const alphaA1 = Math.acos((d1 / dA1) * Math.cos(alpha));
-        const alphaA2 = Math.acos((d2 / dA2) * Math.cos(alpha));
+        const sB1 = this.teethWidth(
+            dB1,
+            this.mathService.involute(alphaB1),
+            d1,
+            sP1,
+            alphaInv
+        );
 
-        // Arc length of tooth at the base pitch circle
-        const sA1 = dA1 * (sB1 / dB1 - this.mathService.involute(alphaA1));
-        const sA2 = dA2 * (sB2 / dB2 - this.mathService.involute(alphaA2));
+        const sB2 = this.teethWidth(
+            dB2,
+            this.mathService.involute(alphaB2),
+            d2,
+            sP2,
+            alphaInv
+        );
 
-        // TODO fix spacing between two meshing teeth and remove these after
-        // const ang = (2 * sP1) / d1;
-        // const angw = (2 * sW1) / d1Prime;
-        // const angb = (2 * sB1) / dB1;
-        // const anga = (2 * sA1) / dA1;
+        const sA1 = this.teethWidth(
+            dA1,
+            this.mathService.involute(alphaA1),
+            d1,
+            sP1,
+            alphaInv
+        );
 
-        // const test = Math.acos((d1 / d1) * Math.cos(alpha));
-        // const testw = Math.acos((d1 / d1Prime) * Math.cos(alpha));
-        // const testb = Math.acos((d1 / dB1) * Math.cos(alpha));
-        // const testa = Math.acos((d1 / dA1) * Math.cos(alpha));
+        const sA2 = this.teethWidth(
+            dA2,
+            this.mathService.involute(alphaA2),
+            d2,
+            sP2,
+            alphaInv
+        );
+
+        // Angle of teeth at every circle (except for dedendum circle)
+        const thetaW1 = this.teethAngle(d1Prime, sW1);
+        const thetaW2 = this.teethAngle(d2Prime, sW2);
+
+        const thetaB1 = this.teethAngle(dB1, sB1);
+        const thetaB2 = this.teethAngle(dB2, sB2);
+
+        const thetaA1 = this.teethAngle(dA1, sA1);
+        const thetaA2 = this.teethAngle(dA2, sA2);
+
+        const thetaP1 = this.teethAngle(d1, sP1);
+        const thetaP2 = this.teethAngle(d2, sP2);
 
         const rho = 0.38 * m;
 
@@ -248,38 +307,55 @@ export class GearParametersService {
             CenterDistanceCoefficient: y,
             TransmissionRatio: i,
             ContactRatio: epsilon,
-            Pitch: p,
+            MinimumTeethAmount: zg,
+            CircularPitch: p,
             FilletRadius: rho,
         } as GearMechanismData;
 
         const Pinion = {
             NumberOfTeeth: z1,
             ShiftCoefficient: x1,
-            ReferencePitchDiameter: d1,
-            OperatingPitchDiameter: d1Prime,
-            DedendumDiameter: dF1,
-            AddendumDiameter: dA1,
-            BaseCircleDiameter: dB1,
-            ThicknessReference: sP1,
-            ThicknessOperating: sW1,
-            ThicknessBase: sB1,
+            TeethSpacing: spacing1,
+            DiameterAddendum: dA1,
+            DiameterWorking: d1Prime,
+            DiameterReference: d1,
+            DiameterBase: dB1,
+            DiameterDedendum: dF1,
             ThicknessTip: sA1,
-            AngleTip: alphaA1,
+            ThicknessWorking: sW1,
+            ThicknessReference: sP1,
+            ThicknessBase: sB1,
+            PressureAngleTip: alphaA1,
+            PressureAngleWorking: alphaW1,
+            PressureAngleReference: alphaP1,
+            PressureAngleBase: alphaB1,
+            WidthAngleTip: thetaA1,
+            WidthAngleWorking: thetaW1,
+            WidthAngleReference: thetaP1,
+            WidthAngleBase: thetaB1,
         } as GearCharacteristicsData;
 
         const Gear = {
             NumberOfTeeth: z2,
             ShiftCoefficient: x2,
-            ReferencePitchDiameter: d2,
-            OperatingPitchDiameter: d2Prime,
-            DedendumDiameter: dF2,
-            AddendumDiameter: dA2,
-            BaseCircleDiameter: dB2,
-            ThicknessReference: sP2,
-            ThicknessOperating: sW2,
-            ThicknessBase: sB2,
+            TeethSpacing: spacing2,
+            DiameterAddendum: dA2,
+            DiameterWorking: d2Prime,
+            DiameterReference: d2,
+            DiameterBase: dB2,
+            DiameterDedendum: dF2,
             ThicknessTip: sA2,
-            AngleTip: alphaA2,
+            ThicknessWorking: sW2,
+            ThicknessReference: sP2,
+            ThicknessBase: sB2,
+            PressureAngleTip: alphaA2,
+            PressureAngleWorking: alphaW2,
+            PressureAngleReference: alphaP2,
+            PressureAngleBase: alphaB2,
+            WidthAngleTip: thetaA2,
+            WidthAngleWorking: thetaW2,
+            WidthAngleReference: thetaP2,
+            WidthAngleBase: thetaB2,
         } as GearCharacteristicsData;
 
         const Result = {
@@ -287,10 +363,9 @@ export class GearParametersService {
             PinionData: Pinion,
             MechanismData,
             MechanismGeometry: undefined,
-            ActionPosition: new Point(Pinion.OperatingPitchDiameter / 2, 0),
+            ActionPosition: new Point(Pinion.DiameterWorking / 2, 0),
             GearPosition: new Point(
-                Pinion.OperatingPitchDiameter / 2 +
-                    Gear.OperatingPitchDiameter / 2,
+                Pinion.DiameterWorking / 2 + Gear.DiameterWorking / 2,
                 0
             ),
             PinionPosition: new Point(0, 0),

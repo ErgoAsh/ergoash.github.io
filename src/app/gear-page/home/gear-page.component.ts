@@ -70,11 +70,11 @@ export class GearPageComponent implements AfterViewInit, OnInit {
             z2: [this.dataModel.z2, [Validators.required, Validators.min(10)]],
             x1: [
                 this.dataModel.x1,
-                [Validators.required, Validators.min(-1), Validators.max(1)],
+                [Validators.required, Validators.min(-2), Validators.max(2)],
             ],
             x2: [
                 this.dataModel.x2,
-                [Validators.required, Validators.min(-1), Validators.max(1)],
+                [Validators.required, Validators.min(-2), Validators.max(2)],
             ],
         });
     }

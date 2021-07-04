@@ -347,8 +347,7 @@ export class GearGeometryService {
         });
 
         const offsetGear =
-            (1 / 2) * Math.PI -
-            this.mathService.involute(gear.PressureAngleWorking);
+            Math.PI - this.mathService.involute(gear.PressureAngleWorking);
 
         const gearAngles = this.gearParametersService.generateAngleData(
             gear.NumberOfTeeth,

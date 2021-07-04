@@ -113,13 +113,11 @@ export class GearParametersService {
 
         const Dwell = this.mathService.linspace(
             arcPointNumber,
-            startOffsetAngle + 2 * involuteAngle + tipAngle,
-            startOffsetAngle + toothSpacingAngle
+            startOffsetAngle + 2 * involuteAngle + tipAngle + 0.0000001,
+            startOffsetAngle + toothSpacingAngle - 0.000001 // TODO fix? IDK what's going on
         );
         for (let j = 0; j < teethNumber; j++) {
-            const dwellCorrected = isBaseBelowDedendum
-                ? Dwell.slice(1, arcPointNumber - 1)
-                : Dwell.slice(1, arcPointNumber - 1); // TODO fix this line
+            const dwellCorrected = isBaseBelowDedendum ? Dwell : Dwell; // TODO fix this line
 
             for (const Item of dwellCorrected.map(
                 (n) => n + j * toothSpacingAngle

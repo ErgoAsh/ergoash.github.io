@@ -47,6 +47,136 @@ export class GearGeometryService {
         return newProfile;
     }
 
+    public generateGearAxis(
+        pinionCenter: Point,
+        gearCenter: Point,
+        centerPoint: Point,
+        pinionAddendumDiameter: number,
+        gearAddendumDiameter: number,
+        pinionBaseDiameter: number,
+        gearBaseDiameter: number,
+        pinionWorkingDiameter: number,
+        gearWorkingDiameter: number,
+        workingPressureAngle: number,
+        additionalLength: number
+    ): GearGeometry[] {
+        const pinionRadius = pinionAddendumDiameter / 2;
+        const gearRadius = gearAddendumDiameter / 2;
+
+        const horizontalLine = d3.path();
+        horizontalLine.moveTo(
+            pinionCenter.x - pinionRadius - additionalLength,
+            pinionCenter.y
+        );
+        horizontalLine.lineTo(
+            gearCenter.x + gearRadius + additionalLength,
+            gearCenter.y
+        );
+
+        const verticalPinionLine = d3.path();
+        verticalPinionLine.moveTo(
+            pinionCenter.x,
+            pinionCenter.y - pinionRadius - additionalLength
+        );
+        verticalPinionLine.lineTo(
+            pinionCenter.x,
+            pinionCenter.y + pinionRadius + additionalLength
+        );
+
+        const verticalGearLine = d3.path();
+        verticalGearLine.moveTo(
+            gearCenter.x,
+            gearCenter.y - gearRadius - additionalLength
+        );
+        verticalGearLine.lineTo(
+            gearCenter.x,
+            gearCenter.y + gearRadius + additionalLength
+        );
+
+        const pinionLength =
+            Math.sqrt(
+                Math.pow(pinionAddendumDiameter / 2, 2) -
+                    Math.pow(pinionBaseDiameter / 2, 2)
+            ) -
+            (pinionWorkingDiameter / 2) * Math.sin(workingPressureAngle);
+        const gearLength =
+            Math.sqrt(
+                Math.pow(gearAddendumDiameter / 2, 2) -
+                    Math.pow(gearBaseDiameter / 2, 2)
+            ) -
+            (gearWorkingDiameter / 2) * Math.sin(workingPressureAngle);
+
+        const pressureStart = new Point(
+            centerPoint.x + pinionLength * Math.sin(workingPressureAngle),
+            centerPoint.y - pinionLength * Math.cos(workingPressureAngle)
+        );
+        const pressureEnd = new Point(
+            centerPoint.x - gearLength * Math.sin(workingPressureAngle),
+            centerPoint.y + gearLength * Math.cos(workingPressureAngle)
+        );
+
+        const pressureLine = d3.path();
+        pressureLine.moveTo(pressureStart.x, pressureStart.y);
+        pressureLine.lineTo(pressureEnd.x, pressureEnd.y);
+
+        const circleStart = d3.path();
+        circleStart.arc(pressureStart.x, pressureStart.y, 0.25, 0, 2 * Math.PI);
+
+        const circleEnd = d3.path();
+        circleEnd.arc(pressureEnd.x, pressureEnd.y, 0.25, 0, 2 * Math.PI);
+
+        return [
+            {
+                path: horizontalLine,
+                attributes: [
+                    { key: 'stroke', value: 'black' },
+                    { key: 'stroke-width', value: '0.25' },
+                    { key: 'stroke-dasharray', value: '4 1 1 1' },
+                ],
+            } as GearGeometry,
+            {
+                path: verticalPinionLine,
+                attributes: [
+                    { key: 'stroke', value: 'black' },
+                    { key: 'stroke-width', value: '0.25' },
+                    { key: 'stroke-dasharray', value: '4 1 1 1' },
+                ],
+            } as GearGeometry,
+            {
+                path: verticalGearLine,
+                attributes: [
+                    { key: 'stroke', value: 'black' },
+                    { key: 'stroke-width', value: '0.25' },
+                    { key: 'stroke-dasharray', value: '4 1 1 1' },
+                ],
+            } as GearGeometry,
+            {
+                path: pressureLine,
+                attributes: [
+                    { key: 'stroke', value: 'brown' },
+                    { key: 'stroke-width', value: '0.75' },
+                ],
+            } as GearGeometry,
+            {
+                path: circleStart,
+                attributes: [
+                    { key: 'stroke', value: 'brown' },
+                    { key: 'stroke-width', value: '0.75' },
+                    { key: 'fill', value: 'brown' },
+                ],
+            } as GearGeometry,
+
+            {
+                path: circleEnd,
+                attributes: [
+                    { key: 'stroke', value: 'brown' },
+                    { key: 'stroke-width', value: '0.75' },
+                    { key: 'fill', value: 'brown' },
+                ],
+            } as GearGeometry,
+        ];
+    }
+
     public generateGearCirclesGeometry(
         center: Point,
         dedendumDiameter: number,
@@ -314,17 +444,34 @@ export class GearGeometryService {
                 gear.DiameterWorking,
                 gear.DiameterAddendum
             ),
+            ...this.generateGearAxis(
+                data.PinionPosition,
+                data.GearPosition,
+                data.ActionPosition,
+                pinion.DiameterAddendum,
+                gear.DiameterAddendum,
+                pinion.DiameterBase,
+                gear.DiameterBase,
+                pinion.DiameterWorking,
+                gear.DiameterWorking,
+                this.mathService.radians(
+                    data.MechanismData.OperatingPressureAngle
+                ),
+                15
+            ),
         ];
 
         const offsetPinion = -this.mathService.involute(
-            pinion.PressureAngleWorking
+            this.mathService.radians(pinion.PressureAngleWorking)
         );
 
         const pinionAngles = this.gearParametersService.generateAngleData(
             pinion.NumberOfTeeth,
-            this.mathService.involute(pinion.PressureAngleTip),
+            this.mathService.involute(
+                this.mathService.radians(pinion.PressureAngleTip)
+            ),
             pinion.TeethSpacing,
-            pinion.WidthAngleTip,
+            this.mathService.radians(pinion.WidthAngleTip),
             offsetPinion,
             5, // TODO add to form
             pinion.DiameterBase < pinion.DiameterDedendum
@@ -347,13 +494,18 @@ export class GearGeometryService {
         });
 
         const offsetGear =
-            Math.PI - this.mathService.involute(gear.PressureAngleWorking);
+            Math.PI -
+            this.mathService.involute(
+                this.mathService.radians(gear.PressureAngleWorking)
+            );
 
         const gearAngles = this.gearParametersService.generateAngleData(
             gear.NumberOfTeeth,
-            this.mathService.involute(gear.PressureAngleTip),
+            this.mathService.involute(
+                this.mathService.radians(gear.PressureAngleTip)
+            ),
             gear.TeethSpacing,
-            gear.WidthAngleTip,
+            this.mathService.radians(gear.WidthAngleTip),
             offsetGear,
             5, // TODO add to form
             gear.DiameterBase < gear.DiameterDedendum

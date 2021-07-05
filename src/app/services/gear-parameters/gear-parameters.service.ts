@@ -85,16 +85,16 @@ export class GearParametersService {
             );
         }
 
-        const Tip = this.mathService.linspace(
+        const tipAngles = this.mathService.linspace(
             arcPointNumber,
             startOffsetAngle + involuteAngle,
             startOffsetAngle + involuteAngle + tipAngle
         );
         for (let j = 0; j < teethNumber; j++) {
-            for (const Item of Tip.slice(1, arcPointNumber - 1).map(
-                (n) => n + j * toothSpacingAngle
-            )) {
-                GearAngleData.set(Item, CurveType.Addendum);
+            for (const item of tipAngles
+                .slice(1, arcPointNumber - 1)
+                .map((n) => n + j * toothSpacingAngle)) {
+                GearAngleData.set(item, CurveType.Addendum);
             }
         }
 
@@ -111,18 +111,20 @@ export class GearParametersService {
             );
         }
 
-        const Dwell = this.mathService.linspace(
+        const dwellAngles = this.mathService.linspace(
             arcPointNumber,
-            startOffsetAngle + 2 * involuteAngle + tipAngle + 0.0000001,
-            startOffsetAngle + toothSpacingAngle - 0.000001 // TODO fix? IDK what's going on
+            startOffsetAngle + 0.000001 + 2 * involuteAngle + tipAngle,
+            startOffsetAngle - 0.000001 + toothSpacingAngle
         );
         for (let j = 0; j < teethNumber; j++) {
-            const dwellCorrected = isBaseBelowDedendum ? Dwell : Dwell; // TODO fix this line
+            const dwellCorrected = isBaseBelowDedendum
+                ? dwellAngles.splice(1, arcPointNumber - 1)
+                : dwellAngles;
 
-            for (const Item of dwellCorrected.map(
+            for (const item of dwellCorrected.map(
                 (n) => n + j * toothSpacingAngle
             )) {
-                GearAngleData.set(Item, CurveType.Dedendum);
+                GearAngleData.set(item, CurveType.Dedendum);
             }
         }
 
@@ -297,6 +299,7 @@ export class GearParametersService {
 
         const rho = 0.38 * m;
 
+        const deg = this.mathService.degrees;
         const MechanismData = {
             Module: m,
             PressureAngle: 20,
@@ -323,14 +326,14 @@ export class GearParametersService {
             ThicknessWorking: sW1,
             ThicknessReference: sP1,
             ThicknessBase: sB1,
-            PressureAngleTip: alphaA1,
-            PressureAngleWorking: alphaW1,
-            PressureAngleReference: alphaP1,
-            PressureAngleBase: alphaB1,
-            WidthAngleTip: thetaA1,
-            WidthAngleWorking: thetaW1,
-            WidthAngleReference: thetaP1,
-            WidthAngleBase: thetaB1,
+            PressureAngleTip: deg(alphaA1),
+            PressureAngleWorking: deg(alphaW1),
+            PressureAngleReference: deg(alphaP1),
+            PressureAngleBase: deg(alphaB1),
+            WidthAngleTip: deg(thetaA1),
+            WidthAngleWorking: deg(thetaW1),
+            WidthAngleReference: deg(thetaP1),
+            WidthAngleBase: deg(thetaB1),
         } as GearCharacteristicsData;
 
         const Gear = {
@@ -346,14 +349,14 @@ export class GearParametersService {
             ThicknessWorking: sW2,
             ThicknessReference: sP2,
             ThicknessBase: sB2,
-            PressureAngleTip: alphaA2,
-            PressureAngleWorking: alphaW2,
-            PressureAngleReference: alphaP2,
-            PressureAngleBase: alphaB2,
-            WidthAngleTip: thetaA2,
-            WidthAngleWorking: thetaW2,
-            WidthAngleReference: thetaP2,
-            WidthAngleBase: thetaB2,
+            PressureAngleTip: deg(alphaA2),
+            PressureAngleWorking: deg(alphaW2),
+            PressureAngleReference: deg(alphaP2),
+            PressureAngleBase: deg(alphaB2),
+            WidthAngleTip: deg(thetaA2),
+            WidthAngleWorking: deg(thetaW2),
+            WidthAngleReference: deg(thetaP2),
+            WidthAngleBase: deg(thetaB2),
         } as GearCharacteristicsData;
 
         const Result = {

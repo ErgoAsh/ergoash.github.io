@@ -46,6 +46,8 @@ export class GearVisualizationService {
             result = figure.append('path').attr('d', element.toString());
         }
 
+        result.attr('fill', 'none');
+
         if (attributes === undefined) {
             result.attr('stroke', 'black');
         } else {
@@ -54,7 +56,7 @@ export class GearVisualizationService {
             }
         }
 
-        return result.attr('fill', 'none');
+        return result;
     }
 
     startAnimation(

@@ -6,7 +6,7 @@ import { PlayerState } from 'src/app/models/gear-player-state.model';
     templateUrl: './gear-player.component.html',
     styleUrls: ['./gear-player.component.scss'],
 })
-export class GearPlayerComponent implements OnInit {
+export class GearPlayerComponent {
     constructor() {}
 
     @Input() canBeActivated = false;
@@ -19,8 +19,6 @@ export class GearPlayerComponent implements OnInit {
 
     sliderValue = 7;
     playerState = PlayerState.STOPPED;
-
-    ngOnInit(): void {}
 
     onSliderChange($event: number): void {
         this.sliderChanged.emit($event);

@@ -16,7 +16,7 @@ import { GearTableService } from 'src/app/services/gear-table/gear-table.service
     templateUrl: './gear-table.component.html',
     styleUrls: ['./gear-table.component.scss'],
 })
-export class GearTableComponent implements OnInit, AfterViewInit, OnChanges {
+export class GearTableComponent implements AfterViewInit, OnChanges {
     constructor(private tableService: GearTableService) {}
 
     @ViewChildren('firstColumn')
@@ -30,8 +30,6 @@ export class GearTableComponent implements OnInit, AfterViewInit, OnChanges {
 
     hasReceivedData = false;
     tabContentHeight = 1;
-
-    ngOnInit(): void {}
 
     ngAfterViewInit(): void {
         const scr = document.querySelector('.ant-table-body') as HTMLElement;

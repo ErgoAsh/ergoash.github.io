@@ -1,4 +1,5 @@
 {
+    "karmaTestExplorer.projectRootPath": "src/app",
     "cSpell.words": [
         "Antd",
         "Cascader",

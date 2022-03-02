@@ -141,6 +141,7 @@
   },
   "defaultProject": "Portfolio",
   "cli": {
+    "analytics": "26ff8288-f0cb-4f76-bdcb-cd06b2e4629a",
     "defaultCollection": "@angular-eslint/schematics"
   }
 }

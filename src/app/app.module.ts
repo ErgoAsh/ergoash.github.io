@@ -11,6 +11,7 @@ import { LandingPageComponent } from './landing-page/home/landing-page.component
 import { GearPageModule } from './gear-page/gear-page.module';
 import { AppComponent } from './app.component';
 import { LandingPageModule } from './landing-page/landing-page.module';
+import { SchedulePageModule } from './schedule-page/schedule-page.module';
 
 import { ZorroAntdModule } from './app-zorro.module';
 import { KatexModule } from 'ng-katex';
@@ -32,6 +33,7 @@ registerLocaleData(en);
         SharedModule,
         GearPageModule,
         LandingPageModule,
+        SchedulePageModule,
 
         FormsModule,
         HttpClientModule,
